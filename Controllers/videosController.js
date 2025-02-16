@@ -1,7 +1,7 @@
 import queryPromise from "../utils/queryPromise.js";
 
 export default function videosController(){
-    const { constructPromise, selectFromId } = queryPromise();
+    const { constructPromise, selectFromId, existsById } = queryPromise();
     
     const listAllVideos = async (req, res) => {
         try {
@@ -19,27 +19,31 @@ export default function videosController(){
             const { id } = req.params; // Extrai o id da URL
             const response = await selectFromId(id)
 
-            if (!response || response.length === 0) {
-                return res.status(404).json({ error: "Video not found or not exists" });
+            
+            if (existsById) {
+                throw new Error("Video not found or not exists");
             }
 
             res.send(response)
         }
         catch (error) {
             console.error(error);
-            res.status(500).send({ error: "Database query failed" });
+            res.status(500).send({ error: error.message || "Database query failed" });
         } 
     }
 
     const deleteVideoById = async (req, res) => {
         try {
             const { id } = req.params;
+
+            if(existsById(id)){
+                throw new Error("Video not found or already deleted")
+            }
+            
             const query = await constructPromise(`DELETE FROM informacoes WHERE id = '${id}';`)
 
             if (query.affectedRows > 0) {
                 res.json({ message: "Video deleted successfully" });
-            }else {
-                throw new Error("Video not found or already deleted") 
             }
         } catch (error) {
             
@@ -122,6 +126,11 @@ export default function videosController(){
         try {
             const request = req.body;
             const { id } = req.params;
+
+            if(existsById(id)){
+                throw new Error("ID not found in database")
+            }
+
     
             if (!request || Object.keys(request).length === 0) {
                 throw new Error("The body of request is empty");
