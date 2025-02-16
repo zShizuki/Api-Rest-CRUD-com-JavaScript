@@ -19,8 +19,9 @@ export default function videosController(){
             const { id } = req.params; // Extrai o id da URL
             const response = await selectFromId(id)
 
-            
-            if (existsById) {
+            const idExists = await existsById(id)
+
+            if(!idExists){
                 throw new Error("Video not found or not exists");
             }
 
@@ -37,7 +38,6 @@ export default function videosController(){
             const { id } = req.params;
 
             const idExists = await existsById(id)
-            console.log(idExists)
 
             if(!idExists){
                 throw new Error("Video not found or already deleted")
