@@ -19,9 +19,8 @@ export default function videosController(){
             const { id } = req.params; // Extrai o id da URL
             const response = await selectFromId(id)
 
-            const idExists = await existsById(id)
-
-            if(!idExists){
+            
+            if (existsById) {
                 throw new Error("Video not found or not exists");
             }
 

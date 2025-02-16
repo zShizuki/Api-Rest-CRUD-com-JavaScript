@@ -26,9 +26,18 @@ export default function queryPromise (){
         return response;
     }
 
+    const existsById = async (id) => {
+        const query = await constructPromise("SELECT EXISTS(select * from informacoes where id = "+id+")")
+        const key = Object.keys(query[0])[0]; 
+        const valor = query[0][key];
+        return valor
+    }
+
+
     return {
         constructPromise,
-        selectFromId
+        selectFromId,
+        existsById
     }
 }
 
