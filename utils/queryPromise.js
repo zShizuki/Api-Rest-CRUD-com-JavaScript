@@ -4,6 +4,7 @@ import db from "../Config/db.js"
 
 export default function queryPromise (){
     const {con} = db()
+    
     const constructPromise = (query) => {
         try {
             const result = new Promise((resolve, reject) => {
@@ -19,8 +20,15 @@ export default function queryPromise (){
         }    
     }
 
+    const selectFromId = (id) => {
+        const response = constructPromise(`SELECT * FROM informacoes WHERE id = ${id}`)
+
+        return response;
+    }
+
     return {
-        constructPromise
+        constructPromise,
+        selectFromId
     }
 }
 
