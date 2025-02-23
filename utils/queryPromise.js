@@ -20,14 +20,14 @@ export default function queryPromise (){
         }    
     }
 
-    const selectFromId = (id) => {
-        const response = constructPromise(`SELECT * FROM informacoes WHERE id = ${id}`)
+    const selectFromId = (id, tabela) => {
+        const response = constructPromise(`SELECT * FROM ${tabela} WHERE id = ${id}`)
 
         return response;
     }
 
-    const existsById = async (id) => {
-        const query = await constructPromise("SELECT EXISTS(select * from informacoes where id = "+id+")")
+    const existsById = async (id, tabela) => {
+        const query = await constructPromise(`SELECT EXISTS(select * from ${tabela} where id = ${id})`)
         const key = Object.keys(query[0])[0]; 
         const valor = query[0][key];
         return valor
