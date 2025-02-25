@@ -190,12 +190,18 @@ export default function videosController(){
         }
     };
 
+    const getVideoByCategory = async (req, res) => {
+        const { id } = req.params
+        const result = constructPromise("SELECT * FROM informacoes WHERE categoriaId ="+id)
+        res.json(result)
+    }
 
     return {
         listAllVideos,
         getVideoById,
         deleteVideoById,
         createVideo,
-        patchVideo
+        patchVideo,
+        getVideoByCategory
     }
 }
