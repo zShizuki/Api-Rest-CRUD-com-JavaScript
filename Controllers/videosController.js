@@ -1,207 +1,176 @@
-import queryPromise from "../utils/queryPromise.js";
+/* eslint-disable import/extensions */
+import queryPromise from '../utils/queryPromise.js';
 
-export default function videosController(){
-    const { constructPromise, selectFromId, existsById } = queryPromise();
-    
-    const listAllVideos = async (req, res) => {
-        try {
-            const {search} = req.query
+export default function videosController() {
+  const { constructPromise, selectFromId, existsById } = queryPromise();
 
-            if(search) {
-                const response = await constructPromise(`SELECT * FROM informacoes WHERE titulo='${search}'`);
+  const listAllVideos = async (req, res) => {
+    try {
+      const { search } = req.query;
 
-                if (Array.isArray(response) && !response.length){
+      if (search) {
+        const response = await constructPromise(`SELECT * FROM informacoes WHERE titulo='${search}'`);
 
-                    throw new Error("Null object returned")
-                } 
-
-                res.send(response)
-
-                return
-            }
-
-            const response = await constructPromise("SELECT * FROM informacoes;");
-            res.send(response);
-        } catch (error) {
-            console.error(error);
-            res.status(500).send({ error: error.message || "Database query failed" });
+        if (Array.isArray(response) && !response.length) {
+          throw new Error('Null object returned');
         }
-    };
 
-    const getVideoById = async (req,res) => {
-        try {
-            const { id } = req.params; // Extrai o id da URL
-            const response = await selectFromId(id, 'informacoes')
+        res.send(response);
 
-            const idExists = await existsById(id, 'informacoes')
+        return;
+      }
 
-            if(!idExists){
-                throw new Error("Video not found or not exists");
-            }
-
-            res.send(response)
-        }
-        catch (error) {
-            console.error(error);
-            res.status(500).send({ error: error.message || "Database query failed" });
-        } 
+      const response = await constructPromise('SELECT * FROM informacoes;');
+      res.send(response);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ error: error.message || 'Database query failed' });
     }
+  };
 
-    const deleteVideoById = async (req, res) => {
-        try {
-            const { id } = req.params;
+  const getVideoById = async (req, res) => {
+    try {
+      const { id } = req.params; // Extrai o id da URL
+      const response = await selectFromId(id, 'informacoes');
 
-            const idExists = await existsById(id, 'informacoes')
+      const idExists = await existsById(id, 'informacoes');
 
-            if(!idExists){
-                throw new Error("Video not found or already deleted")
-            }
-            
-            const query = await constructPromise(`DELETE FROM informacoes WHERE id = '${id}';`)
+      if (!idExists) {
+        throw new Error('Video not found or not exists');
+      }
 
-            if (query.affectedRows > 0) {
-                res.json({ message: "Video deleted successfully" });
-            }
-        } catch (error) {
-            
-            console.error(error);
-            res.status(404).send({ error: "Video not found or already deleted" });
-        }
+      res.send(response);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ error: error.message || 'Database query failed' });
     }
+  };
 
-    const createVideo = async (req, res) => {
-        try {
-            const request = req.body;
-    
-            // Verifica se o req.body está vazio ou não é um array
-            if (!request || request.length === 0) {
-                throw new Error("The body of request is empty");
-            }
-    
-            if(Array.isArray(request)){
-                const responseVideos = [];
-    
-                for (const element of request) {
-                    // Verifica se o objeto atual tem os campos obrigatórios
-                    if (!element.titulo || !element.url) {
-                        console.warn("Objeto ignorado: falta 'titulo' ou 'url'", element);
-                        continue;
-                    }
-        
-                    const descricao = element.descricao || "Sem Descricao";
-                    const categoriaId = element.categoriaId || 1
-                    const categoriaIdExist = await existsById(categoriaId, "categoria")
+  const deleteVideoById = async (req, res) => {
+    try {
+      const { id } = req.params;
 
-                    if(!categoriaIdExist){
-                        throw new Error("Category id dont exists in title: "+element.titulo)
-                    }
-        
-                    // Insere o vídeo no banco de dados
-                    const insertResult = await constructPromise(
-                        `INSERT INTO informacoes (titulo, descricao, url, categoriaId) VALUES ('${element.titulo}', '${descricao}', '${element.url}', ${categoriaId});`
-                    );
-        
-                    // Obtém o ID do vídeo recém-inserido
-                    const newVideoId = insertResult.insertId;
-        
-                    // Obtém o vídeo completo usando o ID
-                    const [newVideo] = await selectFromId(newVideoId, 'informacoes');
-        
-                    if (newVideo) {
-                        responseVideos.push(newVideo);
-                    }
-                }
-        
-                // Verifica se algum vídeo foi adicionado
-                if (responseVideos.length === 0) {
-                    throw new Error("Any videos add");
-                }
-                
-                res.json(responseVideos);
-            }
-            else {
-                if (!request.titulo || !request.url) {
-                    throw new Error("Missing titulo and url")
-                }
-    
-                
-                const descricao = request.descricao || "Sem Descricao";
-                const categoriaId = element.categoriaId || 1
+      const idExists = await existsById(id, 'informacoes');
 
-                const insertResult = await constructPromise(
-                    `INSERT INTO informacoes (titulo, descricao, url, categoriaId) VALUES ('${request.titulo}', '${descricao}', '${request.url}', ${categoriaId});`
-                );
+      if (!idExists) {
+        throw new Error('Video not found or already deleted');
+      }
 
-                const newVideoId = insertResult.insertId;
-                const newVideo = await selectFromId(newVideoId, 'informacoes');
+      const query = await constructPromise(`DELETE FROM informacoes WHERE id = '${id}';`);
 
-                await res.json(newVideo)
-            }
-
-
-            
-        } catch (error) {
-            console.error(error);
-            res.status(500).send({ error: error.message || "Failure to Create in Database" });
-        }
-    };
-
-
-    const patchVideo = async (req, res) => {
-        try {
-            const request = req.body;
-            const { id } = req.params;
-            
-            const idExists = await existsById(id, 'informacoes')
-
-            if(!idExists){
-                throw new Error("ID not found in database")
-            }
-
-    
-            if (!request || Object.keys(request).length === 0) {
-                throw new Error("The body of request is empty");
-            }
-
-            if(Array.isArray(request)){
-                throw new Error("Use an object instead of a array");
-            }
-    
-            // Definindo os campos esperados
-            const camposEsperados = ["titulo", "descricao", "url", "categoriaId"];
-    
-            // Filtrando os campos presentes no request
-            const camposPresentes = camposEsperados.filter(campo => request[campo] !== undefined);
-    
-            if (camposPresentes.length === 0) {
-                throw new Error("Any field with title, descricao or url");
-            }
-
-            camposPresentes.forEach(campo => {
-                constructPromise(`UPDATE informacoes SET ${campo} = '${request[campo]}' where ID = ${id};`)
-            });
-            
-            const response = await selectFromId(id, 'informacoes')
-            res.status(200).json(response);
-    
-        } catch (error) { 
-            console.error(error);
-            res.status(400).send({ error: error.message || "Cant update video" });
-        }
-    };
-
-    const getVideoByCategory = async (req, res) => {
-        const { id } = req.params
-        const result = constructPromise("SELECT * FROM informacoes WHERE categoriaId ="+id)
-        res.json(result)
+      if (query.affectedRows > 0) {
+        res.json({ message: 'Video deleted successfully' });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(404).send({ error: 'Video not found or already deleted' });
     }
+  };
 
-    return {
-        listAllVideos,
-        getVideoById,
-        deleteVideoById,
-        createVideo,
-        patchVideo,
-        getVideoByCategory
+  const createVideo = async (req, res) => {
+    try {
+      const request = req.body;
+
+      if (!request || request.length === 0) {
+        throw new Error('The body of request is empty');
+      }
+
+      if (Array.isArray(request)) {
+        const validRequests = request.filter((element) => element.titulo && element.url);
+
+        if (validRequests.length === 0) {
+          throw new Error('No valid videos to add');
+        }
+
+        const responseVideos = await Promise.all(validRequests.map(async (element) => {
+          const descricao = element.descricao || 'Sem Descricao';
+          const categoriaId = element.categoriaId || 1;
+          const categoriaIdExist = await existsById(categoriaId, 'categoria');
+
+          if (!categoriaIdExist) {
+            throw new Error(`Category ID does not exist for title: ${element.titulo}`);
+          }
+
+          const insertResult = await constructPromise(
+            `INSERT INTO informacoes (titulo, descricao, url, categoriaId) VALUES ('${element.titulo}', '${descricao}', '${element.url}', ${categoriaId});`,
+          );
+
+          const newVideoId = insertResult.insertId;
+          const [newVideo] = await selectFromId(newVideoId, 'informacoes');
+
+          return newVideo;
+        }));
+
+        res.json(responseVideos.filter((video) => video)); // Remove valores `undefined`
+      } else {
+        if (!request.titulo || !request.url) {
+          throw new Error('Missing titulo and url');
+        }
+
+        const descricao = request.descricao || 'Sem Descricao';
+        const categoriaId = request.categoriaId || 1;
+
+        const insertResult = await constructPromise(
+          `INSERT INTO informacoes (titulo, descricao, url, categoriaId) VALUES ('${request.titulo}', '${descricao}', '${request.url}', ${categoriaId});`,
+        );
+
+        const newVideoId = insertResult.insertId;
+        const newVideo = await selectFromId(newVideoId, 'informacoes');
+
+        res.json(newVideo);
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ error: error.message || 'Failure to Create in Database' });
     }
+  };
+
+  const patchVideo = async (req, res) => {
+    try {
+      const request = req.body;
+      const { id } = req.params;
+
+      const idExists = await existsById(id, 'informacoes');
+
+      if (!idExists) {
+        throw new Error('ID not found in database');
+      }
+
+      if (!request || Object.keys(request).length === 0) {
+        throw new Error('The body of request is empty');
+      }
+
+      if (Array.isArray(request)) {
+        throw new Error('Use an object instead of a array');
+      }
+
+      // Definindo os campos esperados
+      const camposEsperados = ['titulo', 'descricao', 'url', 'categoriaId'];
+
+      // Filtrando os campos presentes no request
+      const camposPresentes = camposEsperados.filter((campo) => request[campo] !== undefined);
+
+      if (camposPresentes.length === 0) {
+        throw new Error('Any field with title, descricao or url');
+      }
+
+      camposPresentes.forEach((campo) => {
+        constructPromise(`UPDATE informacoes SET ${campo} = '${request[campo]}' where ID = ${id};`);
+      });
+
+      const response = await selectFromId(id, 'informacoes');
+      res.status(200).json(response);
+    } catch (error) {
+      console.error(error);
+      res.status(400).send({ error: error.message || 'Cant update video' });
+    }
+  };
+
+  return {
+    listAllVideos,
+    getVideoById,
+    deleteVideoById,
+    createVideo,
+    patchVideo,
+  };
 }
