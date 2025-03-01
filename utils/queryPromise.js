@@ -1,13 +1,13 @@
 /* eslint-disable import/extensions */
 import db from '../Config/db.js';
 
-export default function queryPromise() {
-  const { con } = db();
+class QueryPromise {
+  static con = db().con; // 🔹 Define a conexão como um atributo estático
 
-  const constructPromise = (query) => {
+  static constructPromise = (query, values) => {
     try {
       const result = new Promise((resolve, reject) => {
-        con.query(query, (err, rows) => {
+        this.con.query(query, values, (err, rows) => {
           if (err) reject(err);
           else resolve(JSON.parse(JSON.stringify(rows)));
         });
@@ -20,22 +20,34 @@ export default function queryPromise() {
     }
   };
 
-  const selectFromId = (id, tabela) => {
-    const response = constructPromise(`SELECT * FROM ${tabela} WHERE id = ${id}`);
+  static selectFromId = async (id, tabela) => {
+    const response = await this.constructPromise(`SELECT * FROM ${tabela} WHERE id = ${id}`);
 
     return response;
   };
 
-  const existsById = async (id, tabela) => {
-    const query = await constructPromise(`SELECT EXISTS(select * from ${tabela} where id = ${id})`);
+  static existsById = async (id, tabela) => {
+    const query = await this.constructPromise(`SELECT EXISTS(select * from ${tabela} where id = ${id})`);
     const key = Object.keys(query[0])[0];
     const valor = query[0][key];
     return valor;
   };
 
-  return {
-    constructPromise,
-    selectFromId,
-    existsById,
+  static deleteFromId = async (id, tabela) => {
+    const query = await this.constructPromise(`DELETE FROM ${tabela} WHERE id = '${id}';`);
+
+    if (query.affectedRows > 0) {
+      return ({ message: 'deleted successfully' });
+    }
+
+    throw new Error('not found or already deleted');
+  };
+
+  static selectAll = async (tabela) => {
+    const response = await this.constructPromise(`SELECT * FROM ${tabela};`);
+
+    return response;
   };
 }
+
+export default QueryPromise;

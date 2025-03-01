@@ -13,6 +13,7 @@
   "rules": {
       "import/no-extraneous-dependencies": ["error", {"devDependencies": false}],
       "linebreak-style": ["error", "windows"],
+      "no-unused-vars": [ "warn" ],
       "no-console":"off"
   }
 }
