@@ -1,20 +1,24 @@
 /* eslint-disable import/extensions */
 import QueryPromise from '../utils/queryPromise.js';
 
-class Categoria {
+class Video {
   constructor({
     ID,
     titulo,
-    cor,
+    url,
+    descricao,
+    categoriaId,
   }) {
     this.ID = ID || null;
     this.titulo = titulo;
-    this.cor = cor;
+    this.url = url;
+    this.descricao = descricao || 'Sem Descricao';
+    this.categoriaId = categoriaId || 1;
   }
 
   static async listarTodos() {
     try {
-      const response = await QueryPromise.selectAll('categoria');
+      const response = await QueryPromise.selectAll('informacoes');
       return response;
     } catch (error) {
       // Captura erros de consulta ao banco ou outros problemas
@@ -30,9 +34,8 @@ class Categoria {
     }
 
     try {
-      const resultado = await QueryPromise.selectFromId(id, 'categoria');
+      const resultado = await QueryPromise.selectFromId(id, 'informacoes');
 
-      // Se o resultado for vazio (não encontrou categoria)
       if (Array.isArray(resultado) && resultado.length === 0) {
         throw new Error(`Category with ID ${id} not found`);
       }
@@ -46,7 +49,7 @@ class Categoria {
 
   static async deletar(id) {
     try {
-      const deleteQuery = await QueryPromise.deleteFromId(id, 'categoria');
+      const deleteQuery = await QueryPromise.deleteFromId(id, 'informacoes');
       return deleteQuery;
     } catch (error) {
       console.error('Error in deletar:', error.message);
@@ -56,8 +59,8 @@ class Categoria {
 
   async atualizar(id) {
     try {
-      QueryPromise.constructPromise(`UPDATE ${'categoria'} SET titulo = ?, cor = ? WHERE ID = ?;`, [this.titulo, this.cor, id]);
-      const objetoAtualizado = QueryPromise.selectFromId(id, 'categoria');
+      QueryPromise.constructPromise('UPDATE informacoes SET titulo = ?, url = ?, descricao = ?, categoriaId = ? WHERE ID = ?;', [this.titulo, this.url, this.descricao, this.categoriaId, id]);
+      const objetoAtualizado = await QueryPromise.selectFromId(id, 'informacoes');
       return objetoAtualizado;
     } catch (error) {
       console.error('Error in atualizar:', error.message);
@@ -66,15 +69,20 @@ class Categoria {
   }
 
   async criar() {
-    const { insertId } = await QueryPromise.constructPromise('INSERT INTO categoria(titulo, cor) VALUES (?, ?)', [this.titulo, this.cor]);
+    try {
+      const { insertId } = await QueryPromise.constructPromise('INSERT INTO informacoes(titulo, url, descricao, categoriaId) VALUES (?, ?, ?, ?)', [this.titulo, this.url, this.descricao, this.categoriaId]);
 
-    if (!insertId) {
-      throw new Error('Erro ao obter insertId');
+      if (!insertId) {
+        throw new Error('Erro ao obter insertId');
+      }
+
+      const response = await QueryPromise.selectFromId(insertId, 'informacoes');
+      return response[0];
+    } catch (error) {
+      console.error('Error in criar:', error.message);
+      throw error;
     }
-
-    const response = await QueryPromise.selectFromId(insertId, 'categoria');
-    return response[0];
   }
 }
 
-export default Categoria;
+export default Video;

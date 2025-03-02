@@ -1,6 +1,7 @@
 /* eslint-disable import/extensions */
 import express from 'express';
 import category from './categoryRoutes.js';
+import video from './videosRouter.js';
 
 const routes = (app) => {
   app.route('/').get((_, res) => {
@@ -10,6 +11,7 @@ const routes = (app) => {
   app.use(
     express.json(),
     category,
+    video,
   );
 };
 

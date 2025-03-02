@@ -14,39 +14,59 @@ class QueryPromise {
       });
 
       return result;
-    } catch (e) {
-      console.log(e);
-      return e;
+    } catch (error) {
+      console.error('Erro in constrcutPromise queryPromimse', error);
+      throw error;
     }
   };
 
   static selectFromId = async (id, tabela) => {
-    const response = await this.constructPromise(`SELECT * FROM ${tabela} WHERE id = ${id}`);
-
-    return response;
+    try {
+      const response = await this.constructPromise(`SELECT * FROM ${tabela} WHERE id = ${id}`);
+      return response;
+    } catch (error) {
+      console.error('Erro in selectFromId queryPromise', error);
+      throw error;
+    }
   };
 
   static existsById = async (id, tabela) => {
-    const query = await this.constructPromise(`SELECT EXISTS(select * from ${tabela} where id = ${id})`);
-    const key = Object.keys(query[0])[0];
-    const valor = query[0][key];
-    return valor;
+    try {
+      const query = await this.constructPromise(`SELECT EXISTS(select * from ${tabela} where id = ${id})`);
+      const key = Object.keys(query[0])[0];
+      const valor = query[0][key];
+      return valor;
+    } catch (error) {
+      console.error('Erro in existsById queryPromise', error);
+      throw error;
+    }
   };
 
   static deleteFromId = async (id, tabela) => {
-    const query = await this.constructPromise(`DELETE FROM ${tabela} WHERE id = '${id}';`);
+    try {
+      if (id === 1) throw new Error('Cant delete id number 1');
+      const query = await this.constructPromise(`DELETE FROM ${tabela} WHERE id = ?`, [id]);
 
-    if (query.affectedRows > 0) {
-      return ({ message: 'deleted successfully' });
+      if (query.affectedRows > 0) {
+        return ({ message: 'deleted successfully' });
+      }
+
+      throw new Error('not found or already deleted');
+    } catch (error) {
+      console.error('Erro in deleteFromId queryPromise', error);
+      if (error.message.includes('ER_ROW_IS_REFERENCED_')) error.message = "You can't delete a category how is being used in a video";
+      throw error;
     }
-
-    throw new Error('not found or already deleted');
   };
 
   static selectAll = async (tabela) => {
-    const response = await this.constructPromise(`SELECT * FROM ${tabela};`);
-
-    return response;
+    try {
+      const response = await this.constructPromise(`SELECT * FROM ${tabela};`);
+      return response;
+    } catch (error) {
+      console.error('Erro in selectAll queryPromise', error);
+      throw error;
+    }
   };
 }
 

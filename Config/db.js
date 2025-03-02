@@ -10,8 +10,6 @@ export default function db() {
 
   con.connect((err) => {
     if (err) throw err;
-
-    console.log('Conectado Ao Banco de Dados!');
   });
 
   return { con };

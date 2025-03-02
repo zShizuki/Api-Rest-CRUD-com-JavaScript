@@ -1,176 +1,82 @@
 /* eslint-disable import/extensions */
-import queryPromise from '../utils/queryPromise.js';
+import Categoria from '../models/categoria.js';
+import Video from '../models/videos.js';
 
-export default function videosController() {
-  const { constructPromise, selectFromId, existsById } = queryPromise();
-
-  const listAllVideos = async (req, res) => {
+class VideosController {
+  static getVideo = async (req, res) => {
     try {
-      const { search } = req.query;
+      const response = await Video.listarTodos();
+      res.json(response);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: error.message || 'Failed to retrieve data from table' });
+    }
+  };
 
-      if (search) {
-        const response = await constructPromise(`SELECT * FROM informacoes WHERE titulo='${search}'`);
+  static getVideoById = async (req, res) => {
+    try {
+      const { params } = req;
+      const resultado = await Video.pegarPeloId(params.id);
+      res.json(resultado);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ error: error.message || 'Failed to retrieve video' });
+    }
+  };
 
-        if (Array.isArray(response) && !response.length) {
-          throw new Error('Null object returned');
-        }
-
-        res.send(response);
-
-        return;
+  static postVideo = async (req, res) => {
+    try {
+      const { body } = req;
+      if (Array.isArray(body)) {
+        throw new Error('Use an object instead of an array');
       }
+      if (!body || typeof body !== 'object' || Object.keys(body).length === 0) {
+        throw new Error('Empty request body');
+      }
+      const { titulo, url } = body;
+      if (!titulo || !url) {
+        throw new Error('Missing required fields: "titulo" and "url" are required.');
+      }
+      const video = new Video(body);
+      const response = await video.criar();
+      res.status(201).json(response);
+    } catch (error) {
+      console.error('Error in postVideo', error);
+      res.status(500).json({ error: error.message || 'Failed to create video' });
+    }
+  };
 
-      const response = await constructPromise('SELECT * FROM informacoes;');
+  static deleteVideo = async (req, res) => {
+    try {
+      const { params } = req;
+      const response = await Video.deletar(params.id);
       res.send(response);
     } catch (error) {
-      console.error(error);
-      res.status(500).send({ error: error.message || 'Database query failed' });
+      res.status(500).json({ error: error.message || 'Failed to delete video' });
     }
   };
 
-  const getVideoById = async (req, res) => {
+  static patchVideo = async (req, res) => {
     try {
-      const { id } = req.params; // Extrai o id da URL
-      const response = await selectFromId(id, 'informacoes');
-
-      const idExists = await existsById(id, 'informacoes');
-
-      if (!idExists) {
-        throw new Error('Video not found or not exists');
+      const { params } = req;
+      const { body } = req;
+      const {
+        titulo, url, descricao, categoriaId,
+      } = body;
+      if (!titulo && !url && !descricao && !categoriaId) {
+        throw new Error('Missing fields to update: "titulo", "descricao", "url" or "categoriaId" are required.');
       }
-
-      res.send(response);
+      if (categoriaId && !(await Categoria.pegarPeloId(categoriaId))) {
+        throw new Error(`Cannot add category ID ${categoriaId} as it does not exist.`);
+      }
+      const antigo = await Video.pegarPeloId(params.id);
+      const novo = new Video({ ...antigo, ...body });
+      const novoNoBD = await novo.atualizar(params.id);
+      res.json(novoNoBD);
     } catch (error) {
-      console.error(error);
-      res.status(500).send({ error: error.message || 'Database query failed' });
+      res.status(500).json({ error: error.message || 'Failed to update video' });
     }
-  };
-
-  const deleteVideoById = async (req, res) => {
-    try {
-      const { id } = req.params;
-
-      const idExists = await existsById(id, 'informacoes');
-
-      if (!idExists) {
-        throw new Error('Video not found or already deleted');
-      }
-
-      const query = await constructPromise(`DELETE FROM informacoes WHERE id = '${id}';`);
-
-      if (query.affectedRows > 0) {
-        res.json({ message: 'Video deleted successfully' });
-      }
-    } catch (error) {
-      console.error(error);
-      res.status(404).send({ error: 'Video not found or already deleted' });
-    }
-  };
-
-  const createVideo = async (req, res) => {
-    try {
-      const request = req.body;
-
-      if (!request || request.length === 0) {
-        throw new Error('The body of request is empty');
-      }
-
-      if (Array.isArray(request)) {
-        const validRequests = request.filter((element) => element.titulo && element.url);
-
-        if (validRequests.length === 0) {
-          throw new Error('No valid videos to add');
-        }
-
-        const responseVideos = await Promise.all(validRequests.map(async (element) => {
-          const descricao = element.descricao || 'Sem Descricao';
-          const categoriaId = element.categoriaId || 1;
-          const categoriaIdExist = await existsById(categoriaId, 'categoria');
-
-          if (!categoriaIdExist) {
-            throw new Error(`Category ID does not exist for title: ${element.titulo}`);
-          }
-
-          const insertResult = await constructPromise(
-            `INSERT INTO informacoes (titulo, descricao, url, categoriaId) VALUES ('${element.titulo}', '${descricao}', '${element.url}', ${categoriaId});`,
-          );
-
-          const newVideoId = insertResult.insertId;
-          const [newVideo] = await selectFromId(newVideoId, 'informacoes');
-
-          return newVideo;
-        }));
-
-        res.json(responseVideos.filter((video) => video)); // Remove valores `undefined`
-      } else {
-        if (!request.titulo || !request.url) {
-          throw new Error('Missing titulo and url');
-        }
-
-        const descricao = request.descricao || 'Sem Descricao';
-        const categoriaId = request.categoriaId || 1;
-
-        const insertResult = await constructPromise(
-          `INSERT INTO informacoes (titulo, descricao, url, categoriaId) VALUES ('${request.titulo}', '${descricao}', '${request.url}', ${categoriaId});`,
-        );
-
-        const newVideoId = insertResult.insertId;
-        const newVideo = await selectFromId(newVideoId, 'informacoes');
-
-        res.json(newVideo);
-      }
-    } catch (error) {
-      console.error(error);
-      res.status(500).send({ error: error.message || 'Failure to Create in Database' });
-    }
-  };
-
-  const patchVideo = async (req, res) => {
-    try {
-      const request = req.body;
-      const { id } = req.params;
-
-      const idExists = await existsById(id, 'informacoes');
-
-      if (!idExists) {
-        throw new Error('ID not found in database');
-      }
-
-      if (!request || Object.keys(request).length === 0) {
-        throw new Error('The body of request is empty');
-      }
-
-      if (Array.isArray(request)) {
-        throw new Error('Use an object instead of a array');
-      }
-
-      // Definindo os campos esperados
-      const camposEsperados = ['titulo', 'descricao', 'url', 'categoriaId'];
-
-      // Filtrando os campos presentes no request
-      const camposPresentes = camposEsperados.filter((campo) => request[campo] !== undefined);
-
-      if (camposPresentes.length === 0) {
-        throw new Error('Any field with title, descricao or url');
-      }
-
-      camposPresentes.forEach((campo) => {
-        constructPromise(`UPDATE informacoes SET ${campo} = '${request[campo]}' where ID = ${id};`);
-      });
-
-      const response = await selectFromId(id, 'informacoes');
-      res.status(200).json(response);
-    } catch (error) {
-      console.error(error);
-      res.status(400).send({ error: error.message || 'Cant update video' });
-    }
-  };
-
-  return {
-    listAllVideos,
-    getVideoById,
-    deleteVideoById,
-    createVideo,
-    patchVideo,
   };
 }
+
+export default VideosController;
