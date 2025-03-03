@@ -21,9 +21,8 @@ class Video {
       const response = await QueryPromise.selectAll('informacoes');
       return response;
     } catch (error) {
-      // Captura erros de consulta ao banco ou outros problemas
       console.error('Error in listar todos:', error.message);
-      throw error; // Re-lança o erro para que possa ser tratado onde a função for chamada
+      throw error;
     }
   }
 

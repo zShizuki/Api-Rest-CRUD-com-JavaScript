@@ -1,6 +1,8 @@
 /* eslint-disable import/extensions */
 import Category from '../models/categoria.js';
 import QueryPromise from '../utils/queryPromise.js';
+import NotFoundError from '../errors/NotFoundError.js';
+import BadRequestError from '../errors/badRequestError.js';
 
 class CategoryController {
   static getCategory = async (req, res) => {
@@ -51,7 +53,8 @@ class CategoryController {
       const response = await Category.deletar(params.id);
       res.send(response);
     } catch (error) {
-      res.status(500).json({ error: error.message || 'Failed to delete category' });
+      // Lidar com erro no nível da API
+      res.status(error.statusCode || 500).json({ error: error.message || 'Failed to delete category' });
     }
   };
 
@@ -60,14 +63,16 @@ class CategoryController {
       const { params } = req;
       const { body } = req;
       const { titulo, cor } = body;
-      if (!titulo && !cor) throw new Error('Missing fields to update: "titulo" or "cor" are required.');
+
+      if (!titulo && !cor) throw new BadRequestError('Missing fields to update: "titulo" or "cor" are required.');
+      else if ((titulo !== undefined && titulo.trim() === '') || (cor !== undefined && cor.trim() === '')) throw new BadRequestError('Field cor or titulo empty');
+
       const antigo = await Category.pegarPeloId(params.id);
       const novo = new Category({ ...antigo, ...body });
       const novoNoBD = await novo.atualizar(params.id);
-      res.json(novoNoBD);
+      res.json(novoNoBD[0]);
     } catch (error) {
-      console.error('In patchCategory', error);
-      res.status(500).json({ error: error.message || 'Failed to update category' });
+      res.status(error.statusCode || 500).json({ error: error.message || 'Failed to update category' });
     }
   };
 

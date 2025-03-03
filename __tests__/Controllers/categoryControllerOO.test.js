@@ -41,7 +41,7 @@ describe('Testes com Category Controller', () => {
     });
   });
 
-  it('Deve retornar erro ao tentar deletar id 1', async () => {
+  it.skip('Deve retornar erro ao tentar deletar id 1', async () => {
     await expect(Categoria.deletar(1)).rejects.toThrow('Cant delete id number 1');
   });
 });

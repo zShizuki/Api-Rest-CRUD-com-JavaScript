@@ -4,7 +4,7 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --verbose",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watchAll",
     "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
     "start": "nodemon server.js"
@@ -24,6 +24,7 @@
     "eslint": "^8.16.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
-    "jest": "^29.7.0"
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
   }
 }

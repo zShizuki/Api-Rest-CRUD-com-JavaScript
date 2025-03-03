@@ -1,4 +1,5 @@
 /* eslint-disable import/extensions */
+import BadRequestError from '../errors/badRequestError.js';
 import QueryPromise from '../utils/queryPromise.js';
 
 class Categoria {
@@ -49,6 +50,10 @@ class Categoria {
       const deleteQuery = await QueryPromise.deleteFromId(id, 'categoria');
       return deleteQuery;
     } catch (error) {
+      // Tratar erro específico de chave estrangeira
+      if (error.message.includes('ER_ROW_IS_REFERENCED_')) {
+        throw new BadRequestError("You can't delete a category that is being used in a video");
+      }
       console.error('Error in deletar:', error.message);
       throw error;
     }

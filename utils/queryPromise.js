@@ -1,5 +1,7 @@
 /* eslint-disable import/extensions */
 import db from '../Config/db.js';
+import BadRequestError from '../errors/badRequestError.js';
+import NotFoundError from '../errors/NotFoundError.js';
 
 class QueryPromise {
   static con = db().con; // 🔹 Define a conexão como um atributo estático
@@ -44,17 +46,16 @@ class QueryPromise {
 
   static deleteFromId = async (id, tabela) => {
     try {
-      if (id === 1) throw new Error('Cant delete id number 1');
+      if (Number(id) === 1) throw new BadRequestError('You cant delete id number 1');
       const query = await this.constructPromise(`DELETE FROM ${tabela} WHERE id = ?`, [id]);
 
       if (query.affectedRows > 0) {
         return ({ message: 'deleted successfully' });
       }
 
-      throw new Error('not found or already deleted');
+      throw new NotFoundError('Not found or already deleted');
     } catch (error) {
       console.error('Erro in deleteFromId queryPromise', error);
-      if (error.message.includes('ER_ROW_IS_REFERENCED_')) error.message = "You can't delete a category how is being used in a video";
       throw error;
     }
   };
