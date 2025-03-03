@@ -1,5 +1,5 @@
 /* eslint-disable import/extensions */
-import QueryPromise from '../utils/queryPromise.js';
+import QueryPromise from '../../utils/queryPromise.js';
 
 class Video {
   constructor({

@@ -2,13 +2,11 @@
 /* eslint-disable no-undef */
 /* eslint-disable import/no-extraneous-dependencies */
 import {
-  describe, expect, it, jest,
+  describe, it, jest,
 } from '@jest/globals';
 import request from 'supertest';
-// eslint-disable-next-line import/extensions
 import app from '../../Config/app.js';
-import Categoria from '../../models/categoria.js';
-import QueryPromise from '../../utils/queryPromise.js';
+import Categoria from '../../classes/models/categoria.js';
 
 let server;
 beforeEach(() => {

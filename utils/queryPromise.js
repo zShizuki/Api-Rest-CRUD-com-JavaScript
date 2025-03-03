@@ -1,7 +1,7 @@
 /* eslint-disable import/extensions */
 import db from '../Config/db.js';
-import BadRequestError from '../errors/badRequestError.js';
-import NotFoundError from '../errors/NotFoundError.js';
+import BadRequestError from '../classes/errors/badRequestError.js';
+import NotFoundError from '../classes/errors/NotFoundError.js';
 
 class QueryPromise {
   static con = db().con; // 🔹 Define a conexão como um atributo estático

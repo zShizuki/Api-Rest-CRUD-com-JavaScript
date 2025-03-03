@@ -4,7 +4,7 @@ import {
   describe, expect, it, jest,
 } from '@jest/globals';
 import CategoryController from '../../Controllers/categoryController.js';
-import Categoria from '../../models/categoria.js';
+import Categoria from '../../classes/models/categoria.js';
 import QueryPromise from '../../utils/queryPromise.js';
 
 describe('Testes com Category Controller', () => {

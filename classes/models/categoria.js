@@ -1,6 +1,6 @@
 /* eslint-disable import/extensions */
 import BadRequestError from '../errors/badRequestError.js';
-import QueryPromise from '../utils/queryPromise.js';
+import QueryPromise from '../../utils/queryPromise.js';
 
 class Categoria {
   constructor({

@@ -1,6 +1,6 @@
 /* eslint-disable import/extensions */
-import Categoria from '../models/categoria.js';
-import Video from '../models/videos.js';
+import Categoria from '../classes/models/categoria.js';
+import Video from '../classes/models/videos.js';
 
 class VideosController {
   static getVideo = async (req, res) => {

@@ -1,8 +1,7 @@
 /* eslint-disable import/extensions */
-import Category from '../models/categoria.js';
+import Category from '../classes/models/categoria.js';
 import QueryPromise from '../utils/queryPromise.js';
-import NotFoundError from '../errors/NotFoundError.js';
-import BadRequestError from '../errors/badRequestError.js';
+import BadRequestError from '../classes/errors/badRequestError.js';
 
 class CategoryController {
   static getCategory = async (req, res) => {
