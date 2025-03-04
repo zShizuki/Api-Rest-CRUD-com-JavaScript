@@ -31,7 +31,34 @@ Este projeto consiste em uma API REST desenvolvida em JavaScript utilizando Node
    npm install
    ```
 3. Rode um banco de dados mySql usando softwares como XAMPP
-   
+
+## 🎲 Tabelas do Banco de Dados
+
+### 📌 Tabela: `informacoes`
+```sql
+CREATE TABLE informacoes (
+  ID int(11) NOT NULL AUTO_INCREMENT,
+  titulo varchar(30) DEFAULT NULL,
+  descricao varchar(50) DEFAULT NULL,
+  url varchar(50) DEFAULT NULL,
+  categoriaId int(11) DEFAULT NULL,
+  PRIMARY KEY (ID),
+  KEY categoriaId (categoriaId),
+  CONSTRAINT informacoes_ibfk_1 FOREIGN KEY (categoriaId) REFERENCES categoria (ID)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
+
+### 📌 Tabela: `categoria`
+```sql
+CREATE TABLE categoria (
+  ID int(11) NOT NULL AUTO_INCREMENT,
+  titulo varchar(50) DEFAULT NULL,
+  cor varchar(30) DEFAULT NULL,
+  PRIMARY KEY (ID)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
+
+
 ## ▶️ Execução
 Inicie o servidor com o comando:
 ```bash
@@ -59,6 +86,11 @@ npm start
           <td>GET</td>
           <td>/categorias/:id</td>
           <td>Retorna uma categoria específica</td>
+        </tr>
+         <tr>
+          <td>GET</td>
+          <td>/categorias/:id/videos</td>
+          <td>Retorna videos com categoria</td>
         </tr>
         <tr>
           <td>POST</td>
