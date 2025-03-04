@@ -1,153 +1,118 @@
-# API REST em JavaScript com Node.js
+# 🚀 API REST em JavaScript com Node.js  
 
-<table>
-  <tr>
-    <td>
-      <img src="https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white" width="150px" height="50px">
-      <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white" width="150px" height="50px">
-      <img src="https://img.shields.io/badge/Jest-323330?style=for-the-badge&logo=Jest&logoColor=white" width="150px" height="50px">
-      <img src="https://img.shields.io/badge/ESLint-4B32C3?logo=eslint&logoColor=white" width="150px" height="50px">
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <img src="https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white" height="40px">
+  <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white" height="40px">
+  <img src="https://img.shields.io/badge/Jest-323330?style=for-the-badge&logo=Jest&logoColor=white" height="40px">
+  <img src="https://img.shields.io/badge/ESLint-4B32C3?logo=eslint&logoColor=white" height="40px">
+</p>
 
 ## 📌 Sobre o projeto
-Este projeto consiste em uma API REST desenvolvida em JavaScript utilizando Node.js e MySQL como banco de dados.
+Esta API REST foi desenvolvida utilizando **Node.js**, **Express.js** e **MySQL**.  
+Ela permite o **gerenciamento de categorias e vídeos**, oferecendo operações CRUD (Create, Read, Update, Delete).  
 
 ## 🚀 Tecnologias
-- Node.js
-- Express.js
-- MySQL
-- Jest
-- Eslint Airbnb
+- **Node.js** - Ambiente de execução JavaScript.  
+- **Express.js** - Framework para criação de APIs.  
+- **MySQL** - Banco de dados relacional.  
+- **Jest** - Testes automatizados.  
+- **ESLint Airbnb** - Padrões de código.  
+
+---
 
 ## 📦 Instalação
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/zShizuki/Api-Rest-CRUD-com-JavaScript.git
-   ```
-2. Instale as dependências:
-   ```bash
-   npm install
-   ```
-3. Rode um banco de dados mySql usando softwares como XAMPP
 
-## 🎲 Tabelas do Banco de Dados
-
-### 📌 Tabela: `informacoes`
-```sql
-CREATE TABLE informacoes (
-  ID int(11) NOT NULL AUTO_INCREMENT,
-  titulo varchar(30) DEFAULT NULL,
-  descricao varchar(50) DEFAULT NULL,
-  url varchar(50) DEFAULT NULL,
-  categoriaId int(11) DEFAULT NULL,
-  PRIMARY KEY (ID),
-  KEY categoriaId (categoriaId),
-  CONSTRAINT informacoes_ibfk_1 FOREIGN KEY (categoriaId) REFERENCES categoria (ID)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+### 🔹 1. Clonar o repositório
+```bash
+git clone https://github.com/zShizuki/Api-Rest-CRUD-com-JavaScript.git
+cd Api-Rest-CRUD-com-JavaScript
 ```
 
-### 📌 Tabela: `categoria`
-```sql
-CREATE TABLE categoria (
-  ID int(11) NOT NULL AUTO_INCREMENT,
-  titulo varchar(50) DEFAULT NULL,
-  cor varchar(30) DEFAULT NULL,
-  PRIMARY KEY (ID)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+### 🔹 2. Instalar as dependências
+```bash
+npm install
 ```
 
+### 🔹 3. Configurar o Banco de Dados
+- Rode um **banco de dados MySQL** (pode usar o XAMPP, WAMP, ou um banco online).  
+- Crie um banco de dados chamado `api_database`.  
+- Configure as credenciais no arquivo `.db`.
 
-## ▶️ Execução
-Inicie o servidor com o comando:
+### 🔹 4. Iniciar o servidor
 ```bash
 npm start
 ```
 
-## 📌 Endpoints
+---
 
-<table>
-  <tr>
-    <td>
-      <h3>Categorias</h3>
-      <table>
-        <tr>
-          <th>Método</th>
-          <th>Rota</th>
-          <th>Descrição</th>
-        </tr>
-        <tr>
-          <td>GET</td>
-          <td>/categorias</td>
-          <td>Retorna todas as categorias</td>
-        </tr>
-        <tr>
-          <td>GET</td>
-          <td>/categorias/:id</td>
-          <td>Retorna uma categoria específica</td>
-        </tr>
-         <tr>
-          <td>GET</td>
-          <td>/categorias/:id/videos</td>
-          <td>Retorna videos com categoria</td>
-        </tr>
-        <tr>
-          <td>POST</td>
-          <td>/categorias</td>
-          <td>Criar uma nova categoria</td>
-        </tr>
-        <tr>
-          <td>PATCH</td>
-          <td>/categorias/:id</td>
-          <td>Atualiza uma categoria existente</td>
-        </tr>
-        <tr>
-          <td>DELETE</td>
-          <td>/categorias/:id</td>
-          <td>Remove uma categoria</td>
-        </tr>
-      </table>
-    </td>
-    <td>
-      <h3>Vídeos</h3>
-      <table>
-        <tr>
-          <th>Método</th>
-          <th>Rota</th>
-          <th>Descrição</th>
-        </tr>
-        <tr>
-          <td>GET</td>
-          <td>/videos</td>
-          <td>Retorna todos os vídeos</td>
-        </tr>
-        <tr>
-          <td>GET</td>
-          <td>/videos/?search=</td>
-          <td>Retorna vídeos com o titulo</td>
-        </tr>
-        <tr>
-          <td>GET</td>
-          <td>/videos/:id</td>
-          <td>Retorna um vídeo específico</td>
-        </tr>
-        <tr>
-          <td>POST</td>
-          <td>/videos</td>
-          <td>Criar um novo vídeo</td>
-        </tr>
-        <tr>
-          <td>PATCH</td>
-          <td>/videos/:id</td>
-          <td>Atualiza um vídeo existente</td>
-        </tr>
-        <tr>
-          <td>DELETE</td>
-          <td>/videos/:id</td>
-          <td>Remove um vídeo</td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>
+## 🎲 Tabelas do Banco de Dados
+
+### 📌 Tabela: `informacoes`
+Guarda informações sobre os vídeos, vinculando-os a categorias.  
+```sql
+CREATE TABLE informacoes (
+  ID INT(11) NOT NULL AUTO_INCREMENT,
+  titulo VARCHAR(30) DEFAULT NULL,
+  descricao VARCHAR(50) DEFAULT NULL,
+  url VARCHAR(50) DEFAULT NULL,
+  categoriaId INT(11) DEFAULT NULL,
+  PRIMARY KEY (ID),
+  FOREIGN KEY (categoriaId) REFERENCES categoria (ID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
+
+### 📌 Tabela: `categoria`
+Armazena as categorias dos vídeos.  
+```sql
+CREATE TABLE categoria (
+  ID INT(11) NOT NULL AUTO_INCREMENT,
+  titulo VARCHAR(50) DEFAULT NULL,
+  cor VARCHAR(30) DEFAULT NULL,
+  PRIMARY KEY (ID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+```
+
+---
+
+## ⚙ Testes  
+
+### 🔹 Rodar um teste único  
+```bash
+npm test
+```
+
+### 🔹 Rodar testes em modo observação  
+```bash
+npm run test:watch
+```
+
+### 🔹 Gerar relatório de cobertura de testes  
+```bash
+npm run test:coverage
+```
+
+---
+
+## 📌 Endpoints da API  
+
+### 🔹 Categorias  
+| Método  | Rota                 | Descrição                         |
+|---------|----------------------|-----------------------------------|
+| **GET** | `/categorias`        | Retorna todas as categorias.     |
+| **GET** | `/categorias/:id`    | Retorna uma categoria específica. |
+| **GET** | `/categorias/:id/videos` | Retorna vídeos de uma categoria. |
+| **POST** | `/categorias`       | Cria uma nova categoria.         |
+| **PATCH** | `/categorias/:id`  | Atualiza uma categoria.          |
+| **DELETE** | `/categorias/:id` | Remove uma categoria.            |
+
+### 🔹 Vídeos  
+| Método  | Rota                 | Descrição                         |
+|---------|----------------------|-----------------------------------|
+| **GET** | `/videos`            | Retorna todos os vídeos.         |
+| **GET** | `/videos/:id`        | Retorna um vídeo específico.     |
+| **GET** | `/videos/?search=`   | Retorna vídeos filtrados por título. |
+| **POST** | `/videos`           | Cria um novo vídeo.              |
+| **PATCH** | `/videos/:id`      | Atualiza um vídeo existente.     |
+| **DELETE** | `/videos/:id`     | Remove um vídeo.                 |
+
+---
