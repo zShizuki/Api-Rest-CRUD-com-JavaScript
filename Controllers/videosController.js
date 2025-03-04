@@ -6,18 +6,25 @@ import Video from '../classes/models/videos.js';
 class VideosController {
   static getVideo = async (req, res) => {
     try {
+      const { search } = req.query;
+
+      if (search) {
+        const response = await Video.listarPorTitulo(search);
+        return res.json(response);
+      }
+
       const response = await Video.listarTodos();
-      res.json(response);
+      return res.json(response);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: error.message || 'Failed to retrieve data from table' });
+      return res.status(error.statusCode || 500).json({ error: error.message || 'Failed to retrieve data from table' });
     }
   };
 
   static getVideoById = async (req, res) => {
     try {
-      const { params } = req;
-      const resultado = await Video.pegarPeloId(params.id);
+      const { id } = req.params;
+      const resultado = await Video.pegarPeloId(id);
       res.json(resultado);
     } catch (error) {
       console.error(error);

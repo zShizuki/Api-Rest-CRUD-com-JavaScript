@@ -28,6 +28,28 @@ class Video {
     }
   }
 
+  static async listarPorTitulo(titulo) {
+    try {
+      // pega todos os videos da DB
+      let response = await QueryPromise.selectAll('informacoes');
+
+      // transforma o titulo em minusculo
+      const tituloLC = titulo.toLowerCase();
+
+      // Response recebe o array filtrado com o titulo correspondente
+      response = response.filter((video) => video.titulo.toLowerCase().includes(tituloLC));
+
+      // Verifica se o array é vazio, se for joga um erro
+      if (response.length === 0) throw new NotFoundError('Any videos found with this titulo');
+
+      // Retorna array filtrado
+      return response;
+    } catch (error) {
+      console.error('Error in listarPorTitulo:', error.message);
+      throw error;
+    }
+  }
+
   static async pegarPeloId(id) {
     if (!id) {
       console.log(id);

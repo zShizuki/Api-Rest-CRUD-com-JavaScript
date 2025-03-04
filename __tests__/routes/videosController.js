@@ -13,6 +13,7 @@ let server;
 const todosVideos = await Video.listarTodos();
 const todosCategorias = await Categoria.listarTodos();
 let idCriado;
+let tituloCriado;
 
 beforeEach(() => {
   global.console.error = jest.fn();
@@ -34,6 +35,7 @@ describe('POST in /videos', () => {
       .expect(201);
 
     idCriado = criado.body.ID;
+    tituloCriado = criado.body.titulo;
   });
 
   describe('POST ERRORS in /videos', () => {
@@ -71,6 +73,27 @@ describe('GET em /videos', () => {
       .expect('content-type', /json/)
       .expect(200);
   });
+
+  jest.spyOn(Video, 'listarPorTitulo');
+  it('Deve retornar array com objetos no ?search=', async () => {
+    await request(app)
+      .get(`/videos/?search=${tituloCriado}`)
+      .set('Accept', 'application/json')
+      .expect('content-type', /json/)
+      .expect(200);
+
+    expect(Video.listarPorTitulo).toHaveBeenCalled();
+  });
+
+  describe('ERRORS GET in videos', () => {
+    it('Deve retornar erro ao buscar titulo inexistente', async () => {
+      await request(app)
+        .get('/videos/?search=?*/}')
+        .expect(404);
+
+      expect(Video.listarPorTitulo).toHaveBeenCalled();
+    });
+  });
 });
 
 describe('GET em /videos/id', () => {
@@ -80,7 +103,7 @@ describe('GET em /videos/id', () => {
       .expect(200);
   });
 
-  describe('ERRORS GET in videos', () => {
+  describe('ERRORS GET in /videos/id', () => {
     it('Deve retornar erro ao buscar ID inexistente', async () => {
       await request(app)
         .get(`/videos/${idCriado + 1}`)
@@ -89,8 +112,6 @@ describe('GET em /videos/id', () => {
   });
 });
 
-jest.spyOn(Video.prototype, 'atualizar');
-
 describe('PATCH in /videos/id', () => {
   test.each([
     ['titulo', { titulo: 'testandoPatch' }],
@@ -98,6 +119,7 @@ describe('PATCH in /videos/id', () => {
     ['url', { url: 'testandoPatch' }],
     ['categoriaId', { categoriaId: todosCategorias[1].ID }],
   ])('Deve atualizar %s', async (_, param) => {
+    jest.spyOn(Video.prototype, 'atualizar');
     await request(app)
       .patch(`/videos/${idCriado}`)
       .send(param)
