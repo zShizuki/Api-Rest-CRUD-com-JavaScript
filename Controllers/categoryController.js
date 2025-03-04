@@ -21,7 +21,7 @@ class CategoryController {
       res.json(resultado);
     } catch (error) {
       console.error(error);
-      res.status(500).send({ error: error.message || 'Failed to retrieve category' });
+      res.status(error.statusCode || 500).send({ error: error.message || 'Failed to retrieve category' });
     }
   };
 
@@ -29,20 +29,20 @@ class CategoryController {
     try {
       const { body } = req;
       if (Array.isArray(body)) {
-        throw new Error('Use an object instead of an array');
+        throw new BadRequestError('Use an object instead of an array');
       }
       if (!body || typeof body !== 'object' || Object.keys(body).length === 0) {
-        throw new Error('Empty request body');
+        throw new BadRequestError('Empty request body');
       }
       const { titulo, cor } = body;
       if (!titulo || !cor) {
-        throw new Error('Missing required fields: "titulo" and "cor" are required.');
+        throw new BadRequestError('Missing required fields: "titulo" and "cor" are required.');
       }
       const category = new Category(body);
       const response = await category.criar();
       res.status(201).json(response);
     } catch (error) {
-      res.status(500).json({ error: error.message || 'Failed to create category' });
+      res.status(error.statusCode || 500).json({ error: error.message || 'Failed to create category' });
     }
   };
 
@@ -62,9 +62,17 @@ class CategoryController {
       const { params } = req;
       const { body } = req;
       const { titulo, cor } = body;
+      const fields = [titulo, cor];
 
-      if (!titulo && !cor) throw new BadRequestError('Missing fields to update: "titulo" or "cor" are required.');
-      else if ((titulo !== undefined && titulo.trim() === '') || (cor !== undefined && cor.trim() === '')) throw new BadRequestError('Field cor or titulo empty');
+      // Verifica se todos os campos são undefined
+      if (!fields.some((x) => x !== undefined)) {
+        throw new BadRequestError('At least one field ("titulo" or "cor") is required.');
+      }
+
+      // Verifica se algum campo foi enviado, mas está vazio
+      if (fields.some((x) => x !== undefined && String(x).trim() === '')) {
+        throw new BadRequestError('Fields "titulo", or "cor" cannot be empty.');
+      }
 
       const antigo = await Category.pegarPeloId(params.id);
       const novo = new Category({ ...antigo, ...body });

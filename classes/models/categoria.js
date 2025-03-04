@@ -1,6 +1,7 @@
 /* eslint-disable import/extensions */
 import BadRequestError from '../errors/badRequestError.js';
 import QueryPromise from '../../utils/queryPromise.js';
+import NotFoundError from '../errors/NotFoundError.js';
 
 class Categoria {
   constructor({
@@ -27,7 +28,7 @@ class Categoria {
   static async pegarPeloId(id) {
     if (!id) {
       console.log(id);
-      throw new Error('Invalid ID provided');
+      throw new BadRequestError('Invalid ID provided');
     }
 
     try {
@@ -35,7 +36,7 @@ class Categoria {
 
       // Se o resultado for vazio (não encontrou categoria)
       if (Array.isArray(resultado) && resultado.length === 0) {
-        throw new Error(`Category with ID ${id} not found`);
+        throw new NotFoundError(`Category with ID ${id} not found`);
       }
 
       return resultado[0];

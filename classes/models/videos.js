@@ -1,5 +1,7 @@
 /* eslint-disable import/extensions */
 import QueryPromise from '../../utils/queryPromise.js';
+import BadRequestError from '../errors/badRequestError.js';
+import NotFoundError from '../errors/NotFoundError.js';
 
 class Video {
   constructor({
@@ -29,14 +31,14 @@ class Video {
   static async pegarPeloId(id) {
     if (!id) {
       console.log(id);
-      throw new Error('Invalid ID provided');
+      throw new BadRequestError('Invalid ID provided');
     }
 
     try {
       const resultado = await QueryPromise.selectFromId(id, 'informacoes');
 
       if (Array.isArray(resultado) && resultado.length === 0) {
-        throw new Error(`Category with ID ${id} not found`);
+        throw new NotFoundError(`Category with ID ${id} not found`);
       }
 
       return resultado[0];

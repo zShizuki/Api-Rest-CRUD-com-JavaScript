@@ -9,6 +9,9 @@ import app from '../../Config/app.js';
 import Categoria from '../../classes/models/categoria.js';
 
 let server;
+const todos = await Categoria.listarTodos();
+const last = todos.length;
+const lastId = todos[last - 1].ID;
 beforeEach(() => {
   global.console.error = jest.fn();
   const port = 3000;
@@ -33,6 +36,32 @@ describe('POST em /categorias', () => {
 
     idCriado = criado.body.ID;
   });
+
+  describe('POST ERRORS in /categorias', () => {
+    it('Deve dar erro ao tentar criar com o body vazio', async () => {
+      await request(app)
+        .post('/categorias')
+        .send({})
+        .expect(400);
+    });
+
+    it('Deve dar erro ao mandar um objeto sem titulo e cor', async () => {
+      await request(app)
+        .post('/categorias')
+        .send({ nada: 'teste', nada2: 'ola' })
+        .expect(400);
+    });
+
+    test.each([
+      ['titulo', { titulo: 'teste' }],
+      ['cor', { cor: 'teste' }],
+    ])('Deve dar erro ao mandar só testando %s', async (_, param) => {
+      await request(app)
+        .post('/categorias')
+        .send(param)
+        .expect(400);
+    });
+  });
 });
 
 describe('GET em /categorias', () => {
@@ -50,6 +79,14 @@ describe('GET em /categorias/id', () => {
     await request(app)
       .get(`/categorias/${idCriado}`)
       .expect(200);
+  });
+
+  describe('ERRORS GET in categorias', () => {
+    it('Deve retornar erro ao buscar ID inexistente', async () => {
+      await request(app)
+        .get(`/categorias/${idCriado + 1}`)
+        .expect(404);
+    });
   });
 });
 
@@ -72,7 +109,7 @@ describe('PATCH em categoria/id', () => {
         .expect(400);
     });
 
-    it('Deve dar erro ao mandar um objeto sem titulo e cor', async () => {
+    it('Deve dar erro ao mandar um objeto sem titulo ou cor', async () => {
       await request(app)
         .patch(`/categorias/${idCriado}`)
         .send({ nada: 'teste', nada2: 'ola' })
@@ -97,9 +134,6 @@ describe('DELETE em categoria/id', () => {
 
   describe('DELETE ERRORS categorias', () => {
     it('Deve dar erro ao tentar deletar id que não existe', async () => {
-      const todos = await Categoria.listarTodos();
-      const last = todos.length;
-      const lastId = todos[last - 1].ID;
       await request(app)
         .delete(`/categorias/${lastId + 1}`)
         .expect(404);

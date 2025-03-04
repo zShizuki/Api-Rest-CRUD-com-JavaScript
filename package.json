@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --verbose",
-    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watchAll",
-    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watchAll --verbose",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --verbose",
     "start": "nodemon server"
   },
   "author": "",

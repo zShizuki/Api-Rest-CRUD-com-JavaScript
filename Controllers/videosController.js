@@ -1,4 +1,5 @@
 /* eslint-disable import/extensions */
+import BadRequestError from '../classes/errors/badRequestError.js';
 import Categoria from '../classes/models/categoria.js';
 import Video from '../classes/models/videos.js';
 
@@ -20,7 +21,7 @@ class VideosController {
       res.json(resultado);
     } catch (error) {
       console.error(error);
-      res.status(500).send({ error: error.message || 'Failed to retrieve video' });
+      res.status(error.statusCode || 500).send({ error: error.message || 'Failed to retrieve video' });
     }
   };
 
@@ -28,21 +29,21 @@ class VideosController {
     try {
       const { body } = req;
       if (Array.isArray(body)) {
-        throw new Error('Use an object instead of an array');
+        throw new BadRequestError('Use an object instead of an array');
       }
       if (!body || typeof body !== 'object' || Object.keys(body).length === 0) {
-        throw new Error('Empty request body');
+        throw new BadRequestError('Empty request body');
       }
       const { titulo, url } = body;
       if (!titulo || !url) {
-        throw new Error('Missing required fields: "titulo" and "url" are required.');
+        throw new BadRequestError('Missing required fields: "titulo" and "url" are required.');
       }
       const video = new Video(body);
       const response = await video.criar();
       res.status(201).json(response);
     } catch (error) {
       console.error('Error in postVideo', error);
-      res.status(500).json({ error: error.message || 'Failed to create video' });
+      res.status(error.statusCode || 500).json({ error: error.message || 'Failed to create video' });
     }
   };
 
@@ -52,7 +53,7 @@ class VideosController {
       const response = await Video.deletar(params.id);
       res.send(response);
     } catch (error) {
-      res.status(500).json({ error: error.message || 'Failed to delete video' });
+      res.status(error.statusCode || 500).json({ error: error.message || 'Failed to delete video' });
     }
   };
 
@@ -63,18 +64,28 @@ class VideosController {
       const {
         titulo, url, descricao, categoriaId,
       } = body;
-      if (!titulo && !url && !descricao && !categoriaId) {
-        throw new Error('Missing fields to update: "titulo", "descricao", "url" or "categoriaId" are required.');
+
+      const fields = [titulo, url, descricao, categoriaId];
+
+      // Verifica se todos os campos são undefined
+      if (!fields.some((x) => x !== undefined)) {
+        throw new BadRequestError('At least one field ("titulo", "descricao", "url", or "categoriaId") is required.');
       }
+
+      // Verifica se algum campo foi enviado, mas está vazio
+      if (fields.some((x) => x !== undefined && String(x).trim() === '')) {
+        throw new BadRequestError('Fields "titulo", "descricao", "url", and "categoriaId" cannot be empty.');
+      }
+
       if (categoriaId && !(await Categoria.pegarPeloId(categoriaId))) {
-        throw new Error(`Cannot add category ID ${categoriaId} as it does not exist.`);
+        throw new BadRequestError(`Cannot add category ID ${categoriaId} as it does not exist.`);
       }
       const antigo = await Video.pegarPeloId(params.id);
       const novo = new Video({ ...antigo, ...body });
       const novoNoBD = await novo.atualizar(params.id);
       res.json(novoNoBD);
     } catch (error) {
-      res.status(500).json({ error: error.message || 'Failed to update video' });
+      res.status(error.statusCode || 500).json({ error: error.message || 'Failed to update video' });
     }
   };
 }
