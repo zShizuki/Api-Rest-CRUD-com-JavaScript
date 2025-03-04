@@ -92,6 +92,11 @@ npm start
         </tr>
         <tr>
           <td>GET</td>
+          <td>/videos/?search=</td>
+          <td>Retorna todos os vídeos com o titulo do query Param</td>
+        </tr>
+        <tr>
+          <td>GET</td>
           <td>/videos/:id</td>
           <td>Retorna um vídeo específico</td>
         </tr>
