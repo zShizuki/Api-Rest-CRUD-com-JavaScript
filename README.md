@@ -93,7 +93,7 @@ npm start
         <tr>
           <td>GET</td>
           <td>/videos/?search=</td>
-          <td>Retorna todos os vídeos com o titulo do query Param</td>
+          <td>Retorna vídeos com o titulo do query</td>
         </tr>
         <tr>
           <td>GET</td>
