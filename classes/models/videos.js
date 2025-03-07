@@ -52,7 +52,6 @@ class Video {
 
   static async pegarPeloId(id) {
     if (!id) {
-      console.log(id);
       throw new BadRequestError('Invalid ID provided');
     }
 

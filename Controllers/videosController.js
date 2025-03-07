@@ -45,6 +45,7 @@ class VideosController {
       if (!titulo || !url) {
         throw new BadRequestError('Missing required fields: "titulo" and "url" are required.');
       }
+
       const video = new Video(body);
       const response = await video.criar();
       res.status(201).json(response);
@@ -84,9 +85,6 @@ class VideosController {
         throw new BadRequestError('Fields "titulo", "descricao", "url", and "categoriaId" cannot be empty.');
       }
 
-      if (categoriaId && !(await Categoria.pegarPeloId(categoriaId))) {
-        throw new BadRequestError(`Cannot add category ID ${categoriaId} as it does not exist.`);
-      }
       const antigo = await Video.pegarPeloId(params.id);
       const novo = new Video({ ...antigo, ...body });
       const novoNoBD = await novo.atualizar(params.id);

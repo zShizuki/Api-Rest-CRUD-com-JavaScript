@@ -30,7 +30,7 @@ describe('POST in /videos', () => {
     const criado = await request(app)
       .post('/videos')
       .send({
-        titulo: 'testando', url: 'http', descricao: 'desc', categoriaId: null,
+        titulo: 'testando', url: 'http', descricao: 'desc', categoriaId: 1,
       })
       .expect(201);
 
@@ -50,6 +50,13 @@ describe('POST in /videos', () => {
       await request(app)
         .post('/videos')
         .send({ nada: 'teste', nada2: 'ola' })
+        .expect(400);
+    });
+
+    it('Deve dar erro ao mandar um array', async () => {
+      await request(app)
+        .post('/videos')
+        .send([{ nada: 'teste', cor: 'ola' }])
         .expect(400);
     });
 

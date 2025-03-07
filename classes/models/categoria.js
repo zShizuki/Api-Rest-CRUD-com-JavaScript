@@ -17,23 +17,22 @@ class Categoria {
   static async listarTodos() {
     try {
       const response = await QueryPromise.selectAll('categoria');
+      if (Array.isArray(response) && !(response.length > 0)) throw new NotFoundError('Some error occurred in query for select All');
       return response;
     } catch (error) {
       // Captura erros de consulta ao banco ou outros problemas
       console.error('Error in listar todos:', error.message);
-      throw error; // Re-lança o erro para que possa ser tratado onde a função for chamada
+      throw error;
     }
   }
 
   static async pegarPeloId(id) {
-    if (!id) {
-      console.log(id);
-      throw new BadRequestError('Invalid ID provided');
-    }
-
     try {
-      const resultado = await QueryPromise.selectFromId(id, 'categoria');
+      if (!id) {
+        throw new BadRequestError('Invalid ID provided');
+      }
 
+      const resultado = await QueryPromise.selectFromId(id, 'categoria');
       // Se o resultado for vazio (não encontrou categoria)
       if (Array.isArray(resultado) && resultado.length === 0) {
         throw new NotFoundError(`Category with ID ${id} not found`);

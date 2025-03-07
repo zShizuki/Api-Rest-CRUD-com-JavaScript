@@ -7,6 +7,7 @@ import {
 import request from 'supertest';
 import app from '../../Config/app.js';
 import Categoria from '../../classes/models/categoria.js';
+import NotFoundError from '../../classes/errors/NotFoundError.js';
 
 let server;
 const todos = await Categoria.listarTodos();
@@ -23,6 +24,7 @@ afterEach(() => {
   global.console.error.mockRestore();
 });
 
+let objetoCriado;
 let idCriado;
 describe('POST em /categorias', () => {
   it('Deve criar uma nova categoria', async () => {
@@ -34,7 +36,8 @@ describe('POST em /categorias', () => {
       })
       .expect(201);
 
-    idCriado = criado.body.ID;
+    objetoCriado = criado.body;
+    idCriado = objetoCriado.ID;
   });
 
   describe('POST ERRORS in /categorias', () => {
@@ -62,6 +65,13 @@ describe('POST em /categorias', () => {
         .expect(400);
     });
   });
+
+  it('Deve dar erro ao usar array', async () => {
+    await request(app)
+      .post('/categorias')
+      .send([{ titulo: 'teste', cor: 'teste' }])
+      .expect(400);
+  });
 });
 
 describe('GET em /categorias', () => {
@@ -71,6 +81,15 @@ describe('GET em /categorias', () => {
       .set('Accept', 'aplication/json')
       .expect('content-type', /json/)
       .expect(200);
+  });
+
+  describe('ERROR GET in /categorias', () => {
+    it('Deve retornar erro caso falhe a pesquisa no BD', async () => {
+      jest.spyOn(Categoria, 'listarTodos').mockRejectedValue(new NotFoundError('DB error'));
+      await request(app)
+        .get('/categorias')
+        .expect(404);
+    });
   });
 });
 
@@ -86,6 +105,40 @@ describe('GET em /categorias/id', () => {
       await request(app)
         .get(`/categorias/${idCriado + 1}`)
         .expect(404);
+    });
+  });
+});
+
+describe('GET in /categorias/:id/video', () => {
+  afterEach(() => {
+    jest.restoreAllMocks(); // Reseta os mocks depois de cada teste
+  });
+
+  it('Deve retornar video pelo id da categoria', async () => {
+    await request(app)
+      .get('/categorias/1/videos')
+      .expect(200);
+  });
+
+  describe('ERROR GET in /categorias/:id/video', () => {
+    it('Deve retornar erro ao buscar por categoria inexistente', async () => {
+      jest.spyOn(Categoria, 'pegarPeloId').mockRejectedValue(new NotFoundError('Category not found'));
+
+      await request(app)
+        .get(`/categorias/${idCriado}/videos`)
+        .expect(404);
+    });
+
+    it('Deve retornar erro ao buscar por id de categoria que nao esta sendo usada', async () => {
+      await request(app)
+        .get(`/categorias/${idCriado}/videos`)
+        .expect(404);
+    });
+
+    it('Deve retornar erro ao buscar id NaN', async () => {
+      await request(app)
+        .get('/categorias/TESTE/videos')
+        .expect(400);
     });
   });
 });
@@ -124,7 +177,6 @@ describe('PATCH em categoria/id', () => {
     });
   });
 });
-
 describe('DELETE em categoria/id', () => {
   it('Deve deletar o objeto', async () => {
     await request(app)

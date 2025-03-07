@@ -2,15 +2,16 @@
 import Category from '../classes/models/categoria.js';
 import QueryPromise from '../utils/queryPromise.js';
 import BadRequestError from '../classes/errors/badRequestError.js';
+import NotFoundError from '../classes/errors/NotFoundError.js';
 
 class CategoryController {
-  static getCategory = async (req, res) => {
+  static getCategory = async (_, res) => {
     try {
       const response = await Category.listarTodos();
       res.json(response);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: error.message || 'Failed to retrieve data from table' });
+      res.status(error.statusCode || 500).json({ error: error.message || 'Failed to retrieve data from table' });
     }
   };
 
@@ -86,12 +87,15 @@ class CategoryController {
   static getVideoByCategory = async (req, res) => {
     try {
       const { params } = req;
+      const idToNumber = parseInt(params.id, 10);
+      if (Number.isNaN(idToNumber)) throw new BadRequestError('The ID requested is NaN');
+      await Category.pegarPeloId(params.id);
       const response = await QueryPromise.constructPromise('SELECT * FROM informacoes WHERE categoriaId = ?', [params.id]);
-      if (Array.isArray(response) && response.length === 0) throw new Error('No videos found using the ID of this category');
+      if (Array.isArray(response) && response.length === 0) throw new NotFoundError('No videos found using the ID of this category');
       res.json(response);
     } catch (error) {
       console.error('In getVideoByCategory', error);
-      res.status(500).json({ error: error.message || 'Failed to retrieve videos by category' });
+      res.status(error.statusCode || 500).json({ error: error.message || 'Failed to retrieve videos by category' });
     }
   };
 }
