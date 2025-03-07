@@ -74,7 +74,7 @@ class Categoria {
     const { insertId } = await QueryPromise.constructPromise('INSERT INTO categoria(titulo, cor) VALUES (?, ?)', [this.titulo, this.cor]);
 
     if (!insertId) {
-      throw new Error('Erro ao obter insertId');
+      throw new NotFoundError('Erro ao obter insertId');
     }
 
     const response = await QueryPromise.selectFromId(insertId, 'categoria');
