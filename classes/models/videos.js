@@ -21,6 +21,7 @@ class Video {
   static async listarTodos() {
     try {
       const response = await QueryPromise.selectAll('informacoes');
+      if (Array.isArray(response) && !(response.length > 0)) throw new NotFoundError('Some error occurred in query for select All');
       return response;
     } catch (error) {
       console.error('Error in listar todos:', error.message);
@@ -74,6 +75,9 @@ class Video {
       const deleteQuery = await QueryPromise.deleteFromId(id, 'informacoes');
       return deleteQuery;
     } catch (error) {
+      if (error.message.includes('ER_ROW_IS_REFERENCED_')) {
+        throw new BadRequestError("You can't delete a category that is being used in a video");
+      }
       console.error('Error in deletar:', error.message);
       throw error;
     }
@@ -95,7 +99,7 @@ class Video {
       const { insertId } = await QueryPromise.constructPromise('INSERT INTO informacoes(titulo, url, descricao, categoriaId) VALUES (?, ?, ?, ?)', [this.titulo, this.url, this.descricao, this.categoriaId]);
 
       if (!insertId) {
-        throw new Error('Erro ao obter insertId');
+        throw new NotFoundError('Erro ao obter insertId');
       }
 
       const response = await QueryPromise.selectFromId(insertId, 'informacoes');
