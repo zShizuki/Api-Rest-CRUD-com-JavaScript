@@ -5,7 +5,7 @@ import {
 } from '@jest/globals';
 import Video from '../../classes/models/videos';
 import QueryPromise from '../../utils/queryPromise';
-import NotFoundError from '../../classes/errors/NotFoundError';
+import NotFoundError from '../../classes/errors/notFoundError';
 import BadRequestError from '../../classes/errors/badRequestError';
 
 beforeEach(() => {

@@ -1,7 +1,7 @@
 /* eslint-disable import/extensions */
 import BadRequestError from '../errors/badRequestError.js';
 import QueryPromise from '../../utils/queryPromise.js';
-import NotFoundError from '../errors/NotFoundError.js';
+import NotFoundError from '../errors/notFoundError.js';
 
 class Categoria {
   constructor({
@@ -41,6 +41,19 @@ class Categoria {
       return resultado[0];
     } catch (error) {
       console.error('Error in pegarPeloId:', error.message);
+      throw error;
+    }
+  }
+
+  static async paginar(page) {
+    try {
+      if (!page) throw new BadRequestError('query page bad requested');
+
+      const response = await QueryPromise.constructPromise(`SELECT * FROM categoria ORDER BY id LIMIT 5 OFFSET ${page}`);
+
+      return response;
+    } catch (error) {
+      console.error('Error in paginar:', error.message);
       throw error;
     }
   }

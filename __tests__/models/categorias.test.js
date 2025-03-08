@@ -5,7 +5,7 @@ import {
 } from '@jest/globals';
 import Categoria from '../../classes/models/categoria';
 import QueryPromise from '../../utils/queryPromise';
-import NotFoundError from '../../classes/errors/NotFoundError';
+import NotFoundError from '../../classes/errors/notFoundError';
 import BadRequestError from '../../classes/errors/badRequestError';
 
 beforeEach(() => {

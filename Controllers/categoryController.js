@@ -1,17 +1,31 @@
 /* eslint-disable import/extensions */
+
+// eslint-disable-next-line import/no-extraneous-dependencies
+import jwt from 'jsonwebtoken';
 import Category from '../classes/models/categoria.js';
 import QueryPromise from '../utils/queryPromise.js';
 import BadRequestError from '../classes/errors/badRequestError.js';
-import NotFoundError from '../classes/errors/NotFoundError.js';
+import NotFoundError from '../classes/errors/notFoundError.js';
 
 class CategoryController {
-  static getCategory = async (_, res) => {
+  static getCategory = async (req, res) => {
     try {
+      const { page } = req.query;
+      if (page) {
+        const limite = 5;
+
+        const inicio = page * limite;
+
+        const response = await Category.paginar(inicio);
+
+        return res.json(response);
+      }
+
       const response = await Category.listarTodos();
-      res.json(response);
+      return res.json(response);
     } catch (error) {
       console.error(error);
-      res.status(error.statusCode || 500).json({ error: error.message || 'Failed to retrieve data from table' });
+      return res.status(error.statusCode || 500).json({ error: error.message || 'Failed to retrieve data from table' });
     }
   };
 

@@ -1,7 +1,7 @@
 /* eslint-disable import/extensions */
 import db from '../Config/db.js';
 import BadRequestError from '../classes/errors/badRequestError.js';
-import NotFoundError from '../classes/errors/NotFoundError.js';
+import NotFoundError from '../classes/errors/notFoundError.js';
 
 class QueryPromise {
   static con = db().con; // 🔹 Define a conexão como um atributo estático
@@ -17,7 +17,7 @@ class QueryPromise {
 
       return result;
     } catch (error) {
-      console.error('Erro in constrcutPromise queryPromimse', error);
+      console.error('Erro in constructPromise queryPromise', error);
       throw error;
     }
   };

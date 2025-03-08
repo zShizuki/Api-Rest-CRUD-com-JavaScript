@@ -1,12 +1,23 @@
 /* eslint-disable import/extensions */
+import { query } from 'express';
 import BadRequestError from '../classes/errors/badRequestError.js';
-import Categoria from '../classes/models/categoria.js';
 import Video from '../classes/models/videos.js';
+import QueryPromise from '../utils/queryPromise.js';
 
 class VideosController {
   static getVideo = async (req, res) => {
     try {
-      const { search } = req.query;
+      const { search, page } = req.query;
+
+      if (page) {
+        const limite = 5;
+
+        const inicio = page * limite;
+
+        const response = await Video.paginar(inicio);
+
+        return res.json(response);
+      }
 
       if (search) {
         const response = await Video.listarPorTitulo(search);
@@ -27,7 +38,17 @@ class VideosController {
       const resultado = await Video.pegarPeloId(id);
       res.json(resultado);
     } catch (error) {
-      console.error(error);
+      console.error('Error in getVideoById', error);
+      res.status(error.statusCode || 500).send({ error: error.message || 'Failed to retrieve video' });
+    }
+  };
+
+  static getVideoFree = async (req, res) => {
+    try {
+      const response = await QueryPromise.constructPromise('SELECT * FROM informacoes LIMIT 10');
+      res.json(response);
+    } catch (error) {
+      console.error('Error in getVideoFree', error);
       res.status(error.statusCode || 500).send({ error: error.message || 'Failed to retrieve video' });
     }
   };

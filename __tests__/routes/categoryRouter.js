@@ -7,7 +7,7 @@ import {
 import request from 'supertest';
 import app from '../../Config/app.js';
 import Categoria from '../../classes/models/categoria.js';
-import NotFoundError from '../../classes/errors/NotFoundError.js';
+import NotFoundError from '../../classes/errors/notFoundError.js';
 
 let server;
 const todos = await Categoria.listarTodos();
