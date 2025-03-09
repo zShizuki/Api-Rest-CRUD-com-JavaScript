@@ -1,16 +1,21 @@
 name: Run Jest Tests
 
-on:
-  push:
-    branches:
-      - main # Roda o workflow quando houver push na branch main
-  pull_request:
-    branches:
-      - main # Também roda quando um pull request for aberto na branch main
+on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latesta
+    services:
+      mysql:
+        image: mysql:latest
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: videosdb
+          MYSQL_USER: testuser
+          MYSQL_PASSWORD: testpass
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping -h localhost" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
       - name: Checkout código
@@ -23,6 +28,13 @@ jobs:
 
       - name: Instalar dependências
         run: npm install
+
+      - name: Criar .env
+        run: |
+          echo "DB_HOST=localhost" >> .env
+          echo "DB_USER=testuser" >> .env
+          echo "DB_PASSWORD=testpass" >> .env
+          echo "DB_NAME=videosdb" >> .env
 
       - name: Rodar testes com Jest
         run: npm test
