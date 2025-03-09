@@ -32,8 +32,8 @@ jobs:
       - name: Criar .env
         run: |
           echo "DB_HOST=localhost" >> .env
-          echo "DB_USER=testuser" >> .env
-          echo "DB_PASSWORD=testpass" >> .env
+          echo "DB_USER=shine" >> .env
+          echo "DB_PASSWORD=123" >> .env
           echo "DB_NAME=videosdb" >> .env
 
       - name: Rodar testes com Jest

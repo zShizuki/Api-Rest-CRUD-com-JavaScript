@@ -13,7 +13,7 @@ beforeEach(() => {
   global.console.error = jest.fn();
 });
 
-afterEach(() => {
+afterEach(async () => {
   global.console.error.mockRestore();
 });
 

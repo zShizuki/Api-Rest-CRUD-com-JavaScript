@@ -8,6 +8,7 @@ export default function db() {
     user: 'shine',
     password: '123',
     database: 'videosdb',
+    charset: 'utf8', // ou 'utf8'
   });
 
   con.connect((err) => {
