@@ -5,10 +5,12 @@ import {
   describe, expect, it, jest,
 } from '@jest/globals';
 import request from 'supertest';
+import dotenv from 'dotenv';
 import app from '../../Config/app.js';
 import Video from '../../classes/models/videos.js';
 import Categoria from '../../classes/models/categoria.js';
 
+dotenv.config();
 let server;
 const todosVideos = await Video.listarTodos();
 const todosCategorias = await Categoria.listarTodos();
@@ -25,10 +27,13 @@ afterEach(() => {
   global.console.error.mockRestore();
 });
 
+const token = process.env.TOKEN;
 describe('POST in /videos', () => {
   it('Deve criar um video', async () => {
     const criado = await request(app)
       .post('/videos')
+
+      .set('Authorization', `Bearer ${token}`)
       .send({
         titulo: 'testando', url: 'http', descricao: 'desc', categoriaId: 1,
       })
@@ -42,6 +47,8 @@ describe('POST in /videos', () => {
     it('Deve dar erro ao tentar criar com o body vazio', async () => {
       await request(app)
         .post('/videos')
+
+        .set('Authorization', `Bearer ${token}`)
         .send({})
         .expect(400);
     });
@@ -49,6 +56,8 @@ describe('POST in /videos', () => {
     it('Deve dar erro ao mandar um objeto sem titulo e url', async () => {
       await request(app)
         .post('/videos')
+
+        .set('Authorization', `Bearer ${token}`)
         .send({ nada: 'teste', nada2: 'ola' })
         .expect(400);
     });
@@ -56,6 +65,8 @@ describe('POST in /videos', () => {
     it('Deve dar erro ao mandar um array', async () => {
       await request(app)
         .post('/videos')
+
+        .set('Authorization', `Bearer ${token}`)
         .send([{ nada: 'teste', cor: 'ola' }])
         .expect(400);
     });
@@ -66,6 +77,8 @@ describe('POST in /videos', () => {
     ])('Deve dar erro ao mandar só testando %s', async (_, param) => {
       await request(app)
         .post('/videos')
+
+        .set('Authorization', `Bearer ${token}`)
         .send(param)
         .expect(400);
     });
@@ -76,8 +89,12 @@ describe('GET em /videos', () => {
   it('Deve retornar array com objetos', async () => {
     await request(app)
       .get('/videos')
+
+      .set('Authorization', `Bearer ${token}`)
       .set('Accept', 'application/json')
       .expect('content-type', /json/)
+
+      .set('Authorization', `Bearer ${token}`)
       .expect(200);
   });
 
@@ -85,6 +102,8 @@ describe('GET em /videos', () => {
   it('Deve retornar array com objetos no ?search=', async () => {
     await request(app)
       .get(`/videos/?search=${tituloCriado}`)
+
+      .set('Authorization', `Bearer ${token}`)
       .set('Accept', 'application/json')
       .expect('content-type', /json/)
       .expect(200);
@@ -96,6 +115,8 @@ describe('GET em /videos', () => {
     it('Deve retornar erro ao buscar titulo inexistente', async () => {
       await request(app)
         .get('/videos/?search=?*/}')
+
+        .set('Authorization', `Bearer ${token}`)
         .expect(404);
 
       expect(Video.listarPorTitulo).toHaveBeenCalled();
@@ -107,6 +128,8 @@ describe('GET em /videos/id', () => {
   it('Deve pegar o array do id', async () => {
     await request(app)
       .get(`/videos/${idCriado}`)
+
+      .set('Authorization', `Bearer ${token}`)
       .expect(200);
   });
 
@@ -114,6 +137,8 @@ describe('GET em /videos/id', () => {
     it('Deve retornar erro ao buscar ID inexistente', async () => {
       await request(app)
         .get(`/videos/${idCriado + 1}`)
+
+        .set('Authorization', `Bearer ${token}`)
         .expect(404);
     });
   });
@@ -129,6 +154,8 @@ describe('PATCH in /videos/id', () => {
     jest.spyOn(Video.prototype, 'atualizar');
     await request(app)
       .patch(`/videos/${idCriado}`)
+
+      .set('Authorization', `Bearer ${token}`)
       .send(param)
       .expect(200);
 
@@ -140,6 +167,8 @@ describe('PATCH in /videos/id', () => {
     it('Deve dar erro ao tentar atualizar body vazio', async () => {
       await request(app)
         .patch(`/videos/${idCriado}`)
+
+        .set('Authorization', `Bearer ${token}`)
         .send({})
         .expect(400);
       expect(Video.prototype.atualizar).toHaveBeenCalledTimes(4);
@@ -149,6 +178,8 @@ describe('PATCH in /videos/id', () => {
     it('Deve retornar erro ao tentar atualizar um campo que não existe', async () => {
       await request(app)
         .patch(`/videos/${idCriado}`)
+
+        .set('Authorization', `Bearer ${token}`)
         .send({ naoExisteEsseCampo: 'nada' })
         .expect(400);
     });
@@ -156,6 +187,8 @@ describe('PATCH in /videos/id', () => {
     it('Deve retornar erro ao tentar atualizar com um dos campos vazios', async () => {
       await request(app)
         .patch(`/videos/${idCriado}`)
+
+        .set('Authorization', `Bearer ${token}`)
         .send({ titulo: 'aquiOk', url: '' })
         .expect(400);
     });
@@ -166,6 +199,8 @@ describe('DELETE in /videos/id', () => {
   it('Deve deletar um video', async () => {
     await request(app)
       .delete(`/videos/${idCriado}`)
+
+      .set('Authorization', `Bearer ${token}`)
       .expect(200);
   });
 
@@ -175,12 +210,16 @@ describe('DELETE in /videos/id', () => {
       const idVideoNaoExiste = ultimoId + 1;
       await request(app)
         .delete(`/videos/${idVideoNaoExiste}`)
+
+        .set('Authorization', `Bearer ${token}`)
         .expect(404);
     });
 
     it('Deve dar erro ao tentar deletar o id 1', async () => {
       await request(app)
         .delete('/videos/1')
+
+        .set('Authorization', `Bearer ${token}`)
         .expect(400);
     });
   });

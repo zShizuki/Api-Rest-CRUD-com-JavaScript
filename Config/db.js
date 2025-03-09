@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import mysql from 'mysql';
 
 export default function db() {
@@ -6,6 +7,7 @@ export default function db() {
     user: 'root',
     password: '',
     database: 'videosdb',
+
   });
 
   con.connect((err) => {

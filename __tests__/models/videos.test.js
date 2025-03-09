@@ -1,12 +1,13 @@
+/* eslint-disable import/extensions */
 /* eslint-disable no-undef */
 /* eslint-disable import/no-extraneous-dependencies */
 import {
   describe, expect, it, jest,
 } from '@jest/globals';
-import Video from '../../classes/models/videos';
-import QueryPromise from '../../utils/queryPromise';
-import NotFoundError from '../../classes/errors/notFoundError';
-import BadRequestError from '../../classes/errors/badRequestError';
+import Video from '../../classes/models/videos.js';
+import QueryPromise from '../../utils/queryPromise.js';
+import NotFoundError from '../../classes/errors/notFoundError.js';
+import BadRequestError from '../../classes/errors/badRequestError.js';
 
 beforeEach(() => {
   global.console.error = jest.fn();
