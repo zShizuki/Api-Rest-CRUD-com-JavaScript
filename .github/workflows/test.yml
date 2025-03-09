@@ -37,7 +37,7 @@ jobs:
           echo "DB_PASSWORD=testpass" >> .env
           echo "DB_NAME=videosdb" >> .env
 
-      - name: Wait for MySQL to be ready
+      - name: Wait for MySQL to be ready=
         run: |
           for i in `seq 1 10`; do
             if mysqladmin ping -h localhost -u root -proot --silent; then
