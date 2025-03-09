@@ -5,6 +5,7 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+
     services:
       mysql:
         image: mysql:latest
@@ -15,7 +16,7 @@ jobs:
           MYSQL_PASSWORD: testpass
         ports:
           - 3306:3306
-        options: --health-cmd="mysqladmin ping -h localhost" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: --health-cmd="mysqladmin ping -h mysql" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
       - name: Checkout código
@@ -31,10 +32,26 @@ jobs:
 
       - name: Criar .env
         run: |
-          echo "DB_HOST=localhost" >> .env
+          echo "DB_HOST=mysql" >> .env
           echo "DB_USER=shine" >> .env
           echo "DB_PASSWORD=123" >> .env
           echo "DB_NAME=videosdb" >> .env
+
+      - name: Wait for MySQL to be ready
+        run: |
+          for i in `seq 1 10`; do
+            if mysqladmin ping -h mysql -u shine -ptestpass --silent; then
+              echo "MySQL is ready!"
+              break
+            else
+              echo "Waiting for MySQL..."
+              sleep 5
+            fi
+          done
+
+      - name: Grant privileges to shine
+        run: |
+          mysql -h mysql -u root -proot -e "GRANT ALL PRIVILEGES ON videosdb.* TO 'shine'@'%'; FLUSH PRIVILEGES;"
 
       - name: Rodar testes com Jest
         run: npm test
