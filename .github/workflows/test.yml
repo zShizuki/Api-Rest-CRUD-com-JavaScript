@@ -33,14 +33,14 @@ jobs:
       - name: Criar .env
         run: |
           echo "DB_HOST=mysql" >> .env
-          echo "DB_USER=shine" >> .env
-          echo "DB_PASSWORD=123" >> .env
+          echo "DB_USER=testuser" >> .env
+          echo "DB_PASSWORD=testpass" >> .env
           echo "DB_NAME=videosdb" >> .env
 
       - name: Wait for MySQL to be ready
         run: |
           for i in `seq 1 10`; do
-            if mysqladmin ping -h mysql -u shine -ptestpass --silent; then
+            if mysqladmin ping -h mysql -u root -proot --silent; then
               echo "MySQL is ready!"
               break
             else
@@ -49,9 +49,14 @@ jobs:
             fi
           done
 
-      - name: Grant privileges to shine
+      - name: Debug MySQL connection
         run: |
-          mysql -h mysql -u root -proot -e "GRANT ALL PRIVILEGES ON videosdb.* TO 'shine'@'%'; FLUSH PRIVILEGES;"
+          echo "Testing MySQL connection..."
+          mysql -h mysql -u root -proot -e "SHOW DATABASES;"
+
+      - name: Grant privileges to testuser
+        run: |
+          mysql -h mysql -u root -proot -e "GRANT ALL PRIVILEGES ON videosdb.* TO 'testuser'@'%'; FLUSH PRIVILEGES;"
 
       - name: Rodar testes com Jest
         run: npm test
