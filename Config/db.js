@@ -1,6 +1,6 @@
 /* eslint-disable global-require */
 /* eslint-disable import/no-extraneous-dependencies */
-import mysql from 'mysql2';
+import mysql from 'mysql';
 
 export default function db() {
   const con = mysql.createConnection({
