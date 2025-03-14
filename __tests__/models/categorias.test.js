@@ -98,6 +98,31 @@ describe('Testando métodos estáticos', () => {
     });
   });
 
+  describe('Categorias metodo paginar', () => {
+    it('Deve voltar paginado', async () => {
+      const esperado = [{ titulo: 'teste', cor: 'teste' }, { titulo: 'teste2', cor: 'teste2' }];
+      jest.spyOn(QueryPromise, 'constructPromise').mockResolvedValue(esperado);
+
+      const response = await Categoria.paginar(1);
+
+      expect(response).toEqual(expect.objectContaining(esperado));
+      expect(QueryPromise.constructPromise).toHaveBeenCalledTimes(1);
+    });
+
+    describe('ERROS in paginar Categorias', () => {
+      it.each([
+        [null], // null deve dar erro
+        [false], // booleano não é um número válido
+        ['abc'], // string não é válida
+        [-1], // número negativo não pode ser usado
+      ])('Deve lançar BadRequestError para valores inválidos: %p', async (param) => {
+        jest.spyOn(QueryPromise, 'constructPromise').mockImplementation(() => Promise.resolve([]));
+
+        await expect(Categoria.paginar(param)).rejects.toThrow(BadRequestError);
+      });
+    });
+  });
+
   describe('Categorias metodo atualizar', () => {
     it('Deve atualizar categoria', async () => {
       const esperado = {

@@ -2,13 +2,15 @@
 /* eslint-disable no-undef */
 /* eslint-disable import/no-extraneous-dependencies */
 import {
-  describe, it, jest,
+  describe, expect, it, jest,
 } from '@jest/globals';
 import request from 'supertest';
 import dotenv from 'dotenv';
 import app from '../../Config/app.js';
 import Categoria from '../../classes/models/categoria.js';
 import NotFoundError from '../../classes/errors/notFoundError.js';
+import CategoryController from '../../Controllers/categoryController.js';
+import BadRequestError from '../../classes/errors/badRequestError.js';
 
 dotenv.config();
 
@@ -54,6 +56,13 @@ describe('POST em /categorias', () => {
         .expect(400);
     });
 
+    it('Deve dar erro ao acessar sem token', async () => {
+      await request(app)
+        .post('/categorias')
+        .send({ nada: 'teste', nada2: 'ola' })
+        .expect(401);
+    });
+
     it('Deve dar erro ao mandar um objeto sem titulo e cor', async () => {
       await request(app)
         .post('/categorias')
@@ -92,6 +101,18 @@ describe('GET em /categorias', () => {
       .expect(200);
   });
 
+  it('Deve retornar um array no paginar /categorias/?page=', async () => {
+    jest.spyOn(Categoria, 'paginar');
+    await request(app)
+      .get('/categorias/?page=1')
+      .set('Authorization', `Bearer ${token}`)
+      .expect('content-type', /json/)
+      .expect(200);
+
+    expect(Categoria.paginar).toHaveBeenCalledTimes(1);
+    expect(Categoria.paginar).toHaveBeenCalledWith(0);
+  });
+
   describe('ERROR GET in /categorias', () => {
     it('Deve retornar erro caso falhe a pesquisa no BD', async () => {
       jest.spyOn(Categoria, 'listarTodos').mockRejectedValue(new NotFoundError('DB error'));
@@ -99,6 +120,16 @@ describe('GET em /categorias', () => {
         .get('/categorias')
         .set('Authorization', `Bearer ${token}`)
         .expect(404);
+    });
+
+    it('Deve retornar erro caso page nan', async () => {
+      jest.spyOn(Categoria, 'paginar');
+      await request(app)
+        .get('/categorias/?page=a')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(400);
+
+      expect(Categoria.paginar).toHaveBeenCalled();
     });
   });
 });

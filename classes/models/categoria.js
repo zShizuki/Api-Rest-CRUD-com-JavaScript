@@ -47,9 +47,11 @@ class Categoria {
 
   static async paginar(page) {
     try {
-      if (!page) throw new BadRequestError('query page bad requested');
+      if (typeof page !== 'number' || !Number.isInteger(page) || page < 0) {
+        throw new BadRequestError('query page must be a non-negative integer');
+      }
 
-      const response = await QueryPromise.constructPromise(`SELECT * FROM categoria ORDER BY id LIMIT 5 OFFSET ${page}`);
+      const response = await QueryPromise.constructPromise('SELECT * FROM categoria ORDER BY id LIMIT 5 OFFSET ?', [page]);
 
       return response;
     } catch (error) {

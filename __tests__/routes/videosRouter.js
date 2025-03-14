@@ -9,6 +9,7 @@ import dotenv from 'dotenv';
 import app from '../../Config/app.js';
 import Video from '../../classes/models/videos.js';
 import Categoria from '../../classes/models/categoria.js';
+import QueryPromise from '../../utils/queryPromise.js';
 
 dotenv.config();
 let server;
@@ -44,10 +45,16 @@ describe('POST in /videos', () => {
   });
 
   describe('POST ERRORS in /videos', () => {
+    it('Deve dar erro ao acessar sem token', async () => {
+      await request(app)
+        .post('/categorias')
+        .send({ nada: 'teste', nada2: 'ola' })
+        .expect(401);
+    });
+
     it('Deve dar erro ao tentar criar com o body vazio', async () => {
       await request(app)
         .post('/videos')
-
         .set('Authorization', `Bearer ${token}`)
         .send({})
         .expect(400);
@@ -111,6 +118,18 @@ describe('GET em /videos', () => {
     expect(Video.listarPorTitulo).toHaveBeenCalled();
   });
 
+  it('Deve retornar um array no paginar /videos/?page=', async () => {
+    jest.spyOn(Video, 'paginar');
+    await request(app)
+      .get('/videos/?page=1')
+      .set('Authorization', `Bearer ${token}`)
+      .expect('content-type', /json/)
+      .expect(200);
+
+    expect(Video.paginar).toHaveBeenCalledTimes(1);
+    expect(Video.paginar).toHaveBeenCalledWith(0);
+  });
+
   describe('ERRORS GET in videos', () => {
     it('Deve retornar erro ao buscar titulo inexistente', async () => {
       await request(app)
@@ -120,6 +139,39 @@ describe('GET em /videos', () => {
         .expect(404);
 
       expect(Video.listarPorTitulo).toHaveBeenCalled();
+    });
+
+    it('Deve retornar erro caso page nan', async () => {
+      jest.spyOn(Video, 'paginar');
+      await request(app)
+        .get('/videos/?page=a')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(400);
+
+      expect(Video.paginar).toHaveBeenCalled();
+
+      jest.restoreAllMocks();
+    });
+  });
+});
+
+describe('GET em /videos/free', () => {
+  it('Deve retornar os 10 primeiros videos sem precisar de autenticacao', async () => {
+    await request(app)
+      .get('/videos/free')
+      .expect(200);
+  });
+
+  describe('ERROR GET in /videos/free', () => {
+    it('Deve retornar erro caso retorne array vazio', async () => {
+      jest.spyOn(QueryPromise, 'constructPromise').mockResolvedValue([]);
+
+      await request(app)
+        .get('/videos/free')
+        .expect(404);
+
+      expect(QueryPromise.constructPromise).toHaveBeenCalledTimes(1);
+      jest.restoreAllMocks();
     });
   });
 });

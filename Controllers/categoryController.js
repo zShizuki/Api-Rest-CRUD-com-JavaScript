@@ -1,7 +1,6 @@
 /* eslint-disable import/extensions */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-import jwt from 'jsonwebtoken';
 import Category from '../classes/models/categoria.js';
 import QueryPromise from '../utils/queryPromise.js';
 import BadRequestError from '../classes/errors/badRequestError.js';
@@ -13,9 +12,7 @@ class CategoryController {
       const { page } = req.query;
       if (page) {
         const limite = 5;
-
-        const inicio = page * limite;
-
+        const inicio = (page - 1) * limite;
         const response = await Category.paginar(inicio);
 
         return res.json(response);

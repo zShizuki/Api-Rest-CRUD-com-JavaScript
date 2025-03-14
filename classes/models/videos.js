@@ -18,6 +18,17 @@ class Video {
     this.categoriaId = categoriaId || 1;
   }
 
+  static async free() {
+    try {
+      const response = await QueryPromise.constructPromise('SELECT * FROM informacoes LIMIT 10');
+      if (!response || response.length === 0) throw new NotFoundError('Failed to query the first 10 videos');
+      return response;
+    } catch (error) {
+      console.error('Error in free:', error.message);
+      throw error;
+    }
+  }
+
   static async listarTodos() {
     try {
       const response = await QueryPromise.selectAll('informacoes');
@@ -72,8 +83,9 @@ class Video {
 
   static async paginar(page) {
     try {
-      if (!page) throw new BadRequestError('query page bad requested');
-
+      if (typeof page !== 'number' || !Number.isInteger(page) || page < 0) {
+        throw new BadRequestError('query page must be a non-negative integer');
+      }
       const response = await QueryPromise.constructPromise(`SELECT * FROM informacoes ORDER BY id LIMIT 5 OFFSET ${page}`);
 
       return response;

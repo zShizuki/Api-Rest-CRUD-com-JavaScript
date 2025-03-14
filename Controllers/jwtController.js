@@ -25,7 +25,7 @@ class JwtController {
       }
 
       // Gera token válido por 1 hora
-      const token = jwt.sign({ payload: { usuario } }, this.chaveSecreta, { expiresIn: '1h' });
+      const token = jwt.sign({ payload: { usuario } }, this.chaveSecreta, { expiresIn: '1w' });
 
       res.json({ token });
     } catch (error) {

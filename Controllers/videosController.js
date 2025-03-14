@@ -11,9 +11,7 @@ class VideosController {
 
       if (page) {
         const limite = 5;
-
-        const inicio = page * limite;
-
+        const inicio = (page - 1) * limite;
         const response = await Video.paginar(inicio);
 
         return res.json(response);
@@ -43,9 +41,9 @@ class VideosController {
     }
   };
 
-  static getVideoFree = async (req, res) => {
+  static getVideoFree = async (_, res) => {
     try {
-      const response = await QueryPromise.constructPromise('SELECT * FROM informacoes LIMIT 10');
+      const response = await Video.free();
       res.json(response);
     } catch (error) {
       console.error('Error in getVideoFree', error);

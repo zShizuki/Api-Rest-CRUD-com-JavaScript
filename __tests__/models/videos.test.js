@@ -93,6 +93,31 @@ describe('Testando métodos estáticos', () => {
     });
   });
 
+  describe('Videos metodo paginar', () => {
+    it('Deve voltar paginado', async () => {
+      const esperado = [{ titulo: 'teste', url: 'teste' }, { titulo: 'teste2', url: 'teste2' }];
+      jest.spyOn(QueryPromise, 'constructPromise').mockResolvedValue(esperado);
+
+      const response = await Video.paginar(1);
+
+      expect(response).toEqual(expect.objectContaining(esperado));
+      expect(QueryPromise.constructPromise).toHaveBeenCalledTimes(1);
+    });
+
+    describe('ERROS in paginar Videos', () => {
+      it.each([
+        [null], 
+        [false],
+        ['abc'],
+        [-1],
+      ])('Deve lançar BadRequestError para valores inválidos: %p', async (param) => {
+        jest.spyOn(QueryPromise, 'constructPromise').mockImplementation(() => Promise.resolve([]));
+
+        await expect(Video.paginar(param)).rejects.toThrow(BadRequestError);
+      });
+    });
+  });
+
   describe('Videos metodo atualizar', () => {
     it('Deve atualizar categoria', async () => {
       const esperado = {

@@ -1,7 +1,6 @@
 /* eslint-disable import/extensions */
 import express from 'express';
 import CategoryController from '../Controllers/categoryController.js';
-import JwtController from '../Controllers/jwtController.js';
 
 const router = express.Router();
 
