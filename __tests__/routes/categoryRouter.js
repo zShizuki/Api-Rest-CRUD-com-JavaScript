@@ -9,8 +9,6 @@ import dotenv from 'dotenv';
 import app from '../../Config/app.js';
 import Categoria from '../../classes/models/categoria.js';
 import NotFoundError from '../../classes/errors/notFoundError.js';
-import CategoryController from '../../Controllers/categoryController.js';
-import BadRequestError from '../../classes/errors/badRequestError.js';
 
 dotenv.config();
 

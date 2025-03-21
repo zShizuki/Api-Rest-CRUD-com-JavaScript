@@ -52,7 +52,12 @@ class JwtController {
         throw new UnauthorizedError('Token inválido');
       }
 
-      const decoded = jwt.verify(token, this.chaveSecreta);
+      let decoded;
+      try {
+        decoded = jwt.verify(token, this.chaveSecreta);
+      } catch (error) {
+        throw new UnauthorizedError('Token inválido ou expirado');
+      }
 
       if (!decoded.payload || !decoded.payload.usuario) {
         throw new UnauthorizedError('Token inválido');
